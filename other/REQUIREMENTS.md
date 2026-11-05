@@ -29,9 +29,13 @@
 
 | Layer | Content | Origin | Written by | Storage |
 |-------|---------|--------|------------|---------|
-| **System data** | Mail, calendar events, tasks, contacts, notes, chats | External systems (Graph, Google APIs) | Ingest jobs | SQLite |
-| **Input data** | Text, voice notes, documents, corrections, stray ideas | Me, via web app | Web app (input queue) | SQLite queue + file store for attachments |
-| **Curated data** | Knowledge files (people, places, topics), entity links, insights, proposed actions | AI over system + input data | Curator jobs | Markdown repo (git) + SQLite (insights, links, actions) |
+| **L0 Ingestion** | Items: mail, calendar events, tasks, contacts, notes, chats | External systems (Graph, Google APIs) | Ingest jobs | SQLite |
+| **L1 Input** | Text, voice notes, documents, corrections, stray ideas | Me, via web app | Web app (input queue) | SQLite queue + file store for attachments |
+| **L2 Curated** | Knowledge files (people, places, topics), entities, links (entity ↔ item / entity), insights | AI over L0 + L1 | Curator jobs | Markdown repo (git) + SQLite |
+| **L3 Actions** | Proposed and approved write-backs | AI proposals, my approval | Curator → executor | SQLite |
+| **LM Metadata** | Accounts, sync cursors, job & action log | System | All jobs | SQLite |
+
+SQLite tables are prefixed by layer: `l0_`, `l1_`, `l2_`, `l3_`, `lm_`. L0 keeps all kinds in one `l0_items` table (common columns + JSON for kind-specific fields), so a new data type needs no schema change.
 
 ```mermaid
 flowchart LR
@@ -42,10 +46,10 @@ flowchart LR
   end
 
   subgraph Vault
-    SYS[(System data<br/>SQLite)]
-    Q[(Input queue<br/>SQLite + files)]
-    CUR[(Curated data<br/>Markdown git repo<br/>+ SQLite)]
-    LOG[(Job & action log)]
+    SYS[(L0 Ingestion<br/>SQLite)]
+    Q[(L1 Input queue<br/>SQLite + files)]
+    CUR[(L2 Curated<br/>Markdown git repo<br/>+ SQLite)]
+    LOG[(LM Job & action log)]
   end
 
   MS & G -->|ingest jobs<br/>delta, no AI| SYS
@@ -80,7 +84,10 @@ flowchart LR
 | Google Calendar(s) | Calendar API | Easy | Sync tokens |
 | Google Tasks | Tasks API | Easy | |
 | Google Contacts | People API | Easy | Phone contacts source |
-| Google Keep | No official API for personal accounts | Awkward | Unofficial lib or periodic Takeout |
+| Google Keep | No official API for personal accounts | Deferred | Later via Takeout import (unofficial lib rejected: needs account master token) |
+| Google Drive | Drive API | Deferred | Not yet |
+
+**Decision (v1 Google scope):** Gmail (full history), Calendar, Tasks, Contacts.
 
 ### 4.3 Messaging
 
@@ -203,5 +210,5 @@ data/
 2. Push notifications / webhooks vs. polling for near-real-time ingest.
 3. Action routing rules (work vs. personal) and approval UX.
 4. Initial bulk input format for bootstrapping the knowledge base (voice + documents).
-5. Keep ingestion approach for a personal Google account.
+5. ~~Keep ingestion approach for a personal Google account.~~ Deferred; Takeout import later.
 6. Schema of curated SQLite tables (entities, links, insights, actions).

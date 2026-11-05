@@ -1,5 +1,5 @@
 -- Every job run (ingest, curator, action executor); source of the audit page.
-CREATE TABLE job_runs (
+CREATE TABLE lm_job_runs (
     id              INTEGER PRIMARY KEY,
     job_name        TEXT    NOT NULL,  -- e.g. 'ingest.google_calendar'
     scope           TEXT,              -- e.g. account key; NULL for global jobs
@@ -10,4 +10,4 @@ CREATE TABLE job_runs (
     error           TEXT
 );
 
-CREATE INDEX ix_job_runs_job_name_started_at ON job_runs (job_name, started_at);
+CREATE INDEX ix_lm_job_runs_job_name_started_at ON lm_job_runs (job_name, started_at);

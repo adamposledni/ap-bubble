@@ -14,6 +14,8 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
 - Components and external resources keep the `ap` prefix: `ap-adams-bubble[-<name>]` (app folders such as
   `apps/ap-adams-bubble-core`, package names, the data folder, Google Cloud project, scheduled tasks, credential entries).
 - Code drops it: Python modules `adams_bubble_<name>`, env vars `ADAMS_BUBBLE_*`, constants, identifiers.
+- SQLite tables are prefixed by data layer: `l0_` ingestion, `l1_` input, `l2_` curated, `l3_` actions,
+  `lm_` metadata (see `other/REQUIREMENTS.md` §3).
 - `tools/<script>.ps1`: scripts for me (run dev server, deploy, ...); may be empty.
 - Root holds only `.claude/CLAUDE.md`, `.gitignore`, `apps/`, `tools/`, `other/` (requirements, notes).
 

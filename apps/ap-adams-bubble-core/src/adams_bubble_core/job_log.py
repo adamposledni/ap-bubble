@@ -1,4 +1,4 @@
-"""Records every job run in job_runs, so it shows up on the audit page."""
+"""Records every job run in lm_job_runs, so it shows up on the audit page."""
 
 import sqlite3
 from collections.abc import Iterator
@@ -41,7 +41,7 @@ def job_run(conn: sqlite3.Connection, job_name: str, scope: str | None = None) -
 
 def _start(conn: sqlite3.Connection, job_name: str, scope: str | None) -> JobRun:
     cursor = conn.execute(
-        "INSERT INTO job_runs (job_name, scope, status, started_at) VALUES (?, ?, 'running', ?)",
+        "INSERT INTO lm_job_runs (job_name, scope, status, started_at) VALUES (?, ?, 'running', ?)",
         (job_name, scope, _now()),
     )
     conn.commit()
@@ -52,7 +52,7 @@ def _start(conn: sqlite3.Connection, job_name: str, scope: str | None) -> JobRun
 
 def _finish(conn: sqlite3.Connection, run: JobRun, status: str, error: str | None = None) -> None:
     conn.execute(
-        "UPDATE job_runs SET status = ?, finished_at = ?, items_processed = ?, error = ? "
+        "UPDATE lm_job_runs SET status = ?, finished_at = ?, items_processed = ?, error = ? "
         "WHERE id = ?",
         (status, _now(), run.items_processed, error, run.id),
     )

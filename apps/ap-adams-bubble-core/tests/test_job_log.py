@@ -16,7 +16,7 @@ def conn(vault_path: Path) -> Iterator[sqlite3.Connection]:
 
 
 def _only_run(conn: sqlite3.Connection) -> sqlite3.Row:
-    return conn.execute("SELECT * FROM job_runs").fetchone()
+    return conn.execute("SELECT * FROM lm_job_runs").fetchone()
 
 
 def test_successful_run_is_recorded(conn: sqlite3.Connection) -> None:

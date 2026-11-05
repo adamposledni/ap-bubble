@@ -13,7 +13,7 @@ def test_migrate_creates_schema_and_sets_version(vault_path: Path) -> None:
 
     assert version >= 1
     assert stored_version == version
-    assert "job_runs" in tables
+    assert "lm_job_runs" in tables
 
 
 def test_migrate_twice_is_a_no_op(vault_path: Path) -> None:
