@@ -21,6 +21,11 @@ def logs_dir() -> Path:
     return _ensure(data_dir() / "logs")
 
 
+def inbox_dir() -> Path:
+    """Files of L1 inputs."""
+    return _ensure(data_dir() / "inbox")
+
+
 def _local_app_data() -> Path:
     return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
 
