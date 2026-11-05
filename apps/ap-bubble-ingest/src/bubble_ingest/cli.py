@@ -11,6 +11,7 @@ from bubble_core.log import get_logger, setup_logging
 from bubble_ingest.connect import connect_google
 from bubble_ingest.google.calendar import sync as google_calendar
 from bubble_ingest.google.contacts import sync as google_contacts
+from bubble_ingest.google.gmail import sync as gmail
 from bubble_ingest.google.tasks import sync as google_tasks
 
 APP_NAME = "ap-bubble-ingest"
@@ -19,6 +20,7 @@ SYNCS: dict[str, Callable[[sqlite3.Connection], None]] = {
     "google_calendar": google_calendar.sync_all,
     "google_tasks": google_tasks.sync_all,
     "google_contacts": google_contacts.sync_all,
+    "gmail": gmail.sync_all,
 }
 
 logger = get_logger(__name__)
