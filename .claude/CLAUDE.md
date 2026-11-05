@@ -15,7 +15,7 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
   `apps/ap-bubble-core`, package names, the data folder, Google Cloud project, scheduled tasks, credential entries).
 - Code drops it: Python modules `bubble_<name>`, env vars `BUBBLE_*`, constants, identifiers.
 - SQLite tables are prefixed by data layer: `l0_` ingestion, `l1_` input, `l2_` curated, `l3_` actions,
-  `lm_` metadata (see `other/REQUIREMENTS.md` §3).
+  `lm_` metadata, logs, audit (see `other/REQUIREMENTS.md` §3).
 - `tools/<script>.ps1`: scripts for me (run dev server, deploy, ...); may be empty.
 - Root holds only `.claude/CLAUDE.md`, `.gitignore`, `apps/`, `tools/`, `other/` (requirements, notes).
 

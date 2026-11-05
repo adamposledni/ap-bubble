@@ -27,15 +27,16 @@
 
 ## 3. Data layers
 
-| Layer | Content | Origin | Written by | Storage |
-|-------|---------|--------|------------|---------|
-| **L0 Ingestion** | Items: mail, calendar events, tasks, contacts, notes, chats | External systems (Graph, Google APIs) | Ingest jobs | SQLite |
-| **L1 Input** | Text, voice notes, documents, corrections, stray ideas | Me, via web app | Web app (input queue) | SQLite queue + file store for attachments |
-| **L2 Curated** | Knowledge files (people, places, topics), entities, links (entity ↔ item / entity), insights | AI over L0 + L1 | Curator jobs | Markdown repo (git) + SQLite |
-| **L3 Actions** | Proposed and approved write-backs | AI proposals, my approval | Curator → executor | SQLite |
-| **LM Metadata** | Accounts, sync cursors, job & action log | System | All jobs | SQLite |
+| Layer | Content | Written by | Storage | Prefix |
+|-------|---------|------------|---------|--------|
+| **L0 – Ingestion** | Items from external systems: mail, calendar events, tasks, contacts, notes, chats | Ingest jobs (no AI) | SQLite | `l0_` |
+| **L1 – Input** | My own input: text, voice notes, documents, corrections, stray ideas | Web app (input queue) | SQLite + attachment files | `l1_` |
+| **L2 – Curated** | Knowledge files (people, places, topics), entities, links (entity ↔ item / entity), insights | Curator jobs (AI over L0 + L1) | Markdown git repo + SQLite | `l2_` |
+| **L3 – Actions** | Proposed and approved write-backs to external systems | Curator proposes, I approve, executor runs | SQLite | `l3_` |
+| **LM – Metadata, logs, audit** | Accounts, sync cursors, job runs, executed actions | All jobs | SQLite | `lm_` |
 
-SQLite tables are prefixed by layer: `l0_`, `l1_`, `l2_`, `l3_`, `lm_`. L0 keeps all kinds in one `l0_items` table (common columns + JSON for kind-specific fields), so a new data type needs no schema change.
+Flow: **L0 + L1 → L2 → L3**; LM records every step.
+L0 keeps all kinds in one `l0_items` table (common columns + JSON for kind-specific fields), so a new data type needs no schema change.
 
 ```mermaid
 flowchart LR
@@ -46,24 +47,27 @@ flowchart LR
   end
 
   subgraph Vault
-    SYS[(L0 Ingestion<br/>SQLite)]
-    Q[(L1 Input queue<br/>SQLite + files)]
-    CUR[(L2 Curated<br/>Markdown git repo<br/>+ SQLite)]
-    LOG[(LM Job & action log)]
+    L0[(L0 Ingestion)]
+    L1[(L1 Input)]
+    L2[(L2 Curated)]
+    L3[(L3 Actions)]
+    LM[(LM Metadata · logs · audit)]
   end
 
-  MS & G -->|ingest jobs<br/>delta, no AI| SYS
-  MSG -.->|manual import| SYS
-  WEB[Web app<br/>FastAPI + React] -->|input| Q
-  SYS & Q -->|change set| CUR_JOB[Curator job<br/>Claude Code, headless]
-  CUR_JOB --> CUR
-  CUR_JOB --> LOG
-  SYS & CUR & LOG --> WEB
-  SYS & CUR --> MCP[MCP server] --> CHAT[Claude Desktop chat]
-  CUR -->|approved actions| EXEC[Action executor<br/>no AI] --> MS & G
+  MS & G --> ING[Ingest jobs<br/>delta, no AI] --> L0
+  MSG -.->|manual import| L0
+  WEB[Web app<br/>FastAPI + React] -->|input| L1
+  L0 & L1 -->|change set| CUR_JOB[Curator job<br/>Claude Code, headless]
+  CUR_JOB --> L2
+  CUR_JOB -->|proposals| L3
+  WEB -->|approve| L3
+  L3 -->|approved| EXEC[Action executor<br/>no AI] --> MS & G
+  ING & CUR_JOB & EXEC -.->|runs| LM
+  L0 & L2 & LM --> WEB
+  L0 & L2 --> MCP[MCP server] --> CHAT[Claude Desktop chat]
 ```
 
-## 4. System data sources
+## 4. L0 sources
 
 ### 4.1 Work — Microsoft stack (DataBrothers)
 
@@ -101,7 +105,7 @@ flowchart LR
 
 ## 5. Jobs
 
-### 5.1 System ingest jobs (no AI)
+### 5.1 Ingest jobs → L0 (no AI)
 
 - One job per source type, parameterised by account (multi-account).
 - Incremental via delta queries / sync tokens; store cursor per account + source.
@@ -110,10 +114,10 @@ flowchart LR
 - Cadence: **every 5–15 min**. Zero token cost.
 - Optional: on-demand refresh (dashboard button) re-runs ingest for a scope, then UI re-reads the vault. UI never fetches directly from source APIs.
 
-### 5.2 Curator jobs (AI)
+### 5.2 Curator jobs → L2, L3 (AI)
 
 - Runtime: **Claude Code, headless**, started by Windows Task Scheduler, runs on the Claude Team seat (no API/extra usage).
-- Inputs: new input-queue items + system-data change set since last run.
+- Inputs: new L1 input items + L0 change set since last run.
 - **Early exit** if nothing changed → no Claude call.
 - Responsibilities:
   - Turn input data into / update knowledge markdown files.
@@ -125,23 +129,23 @@ flowchart LR
   - **Daily morning** — insight pass for the day/week.
 - Constraint: runs only while the PC is awake; backlog shown as pending on the audit page.
 
-## 6. Action layer (write-back) — future
+## 6. L3 Actions (write-back) — future
 
 - AI produces a **proposed action** record (type, target system, account, payload), e.g.:
   - Create email draft (AI-composed body).
   - Create task in Planner (work) or Google Tasks (personal).
 - Proposals land in an **action queue**; can be triggered proactively from insights ("draft reply to this unanswered email").
 - **Executor** is deterministic code (plain HTTP call to Graph/Google), runs only after approval on the dashboard.
-- Every executed action logged → audit page.
+- Every executed action logged in LM → audit page.
 - Open: routing rules work vs. personal account.
 
-## 7. Entity resolution
+## 7. Entity resolution (L2)
 
 - Same real entity appears differently across sources (e.g. knowledge file "Petr Novák", Gmail address, calendar "Petr, coffee").
 - Curator links records to one entity:
   1. **Auto-link** on certain matches (exact email, phone).
   2. **Ask me** when ambiguous → question appears on the dashboard as a pending item.
-  3. **Correct** via input queue when wrong → fixed on next curator run.
+  3. **Correct** via L1 input when wrong → fixed on next curator run.
 
 ## 8. Interfaces
 
@@ -151,8 +155,8 @@ flowchart LR
 |------|---------|
 | **Dashboard** | Combined view of selected calendars (e.g. DBI work + personal) for availability; all tasks (Planner + Google Tasks); work / personal / both filters; curated insights (day / week / hour); pending questions and proposed actions; warning banner when ingest/curator failed or data is stale. |
 | **Search & entity view** | Keyword search over structured, semi-structured and unstructured data; entity page (e.g. person → birthday, recent mail, next meeting). |
-| **Input** | Upload text, voice, documents, corrections, quick-capture ideas → input queue. |
-| **Audit** | History of ingest, curator and action runs; status, duration, errors, items processed; data freshness per source/account. |
+| **Input** | Upload text, voice, documents, corrections, quick-capture ideas → L1. |
+| **Audit** | From LM: history of ingest, curator and action runs; status, duration, errors, items processed; data freshness per source/account. |
 
 ### 8.2 Chat — MCP connector
 
@@ -166,8 +170,8 @@ flowchart LR
 |-----------|------------|
 | Host | Local Windows PC, desktop-only access (no mobile for now) |
 | Ingest jobs | Python, Windows Task Scheduler |
-| System data, queue, logs, insights, actions | SQLite |
-| Curated knowledge | Markdown files in a **separate git repo** (one file per person / place / topic) |
+| Vault: L0, L1, L2 entities and insights, L3, LM | SQLite |
+| L2 knowledge files | Markdown files in a **separate git repo** (one file per person / place / topic) |
 | Curator | Claude Code headless, Windows Task Scheduler |
 | Web app | FastAPI backend + React frontend, local service |
 | Chat connector | Python MCP server → Claude Desktop |
@@ -188,8 +192,8 @@ ap-bubble-knowledge/             # git repo
 └── me/                          # profile, household, tools I use
 
 data/
-├── vault.db                     # SQLite: system data, queue, entities, insights, actions, job log
-└── inbox/                       # input attachments (voice, docs)
+├── vault.db                     # SQLite: l0_, l1_, l2_, l3_, lm_ tables
+└── inbox/                       # L1 attachments (voice, docs)
 ```
 
 ## 11. Deferred / out of scope (v1)
