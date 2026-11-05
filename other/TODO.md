@@ -29,3 +29,9 @@
       per account, per source). Mind per-user quotas: Gmail measured ~100 full messages/min, and a
       run right after a full load waits out the rate limit (incremental with 0 changes took 65 s).
 - [ ] Schedule ingest jobs (Windows Task Scheduler).
+
+## Web UI
+
+- [ ] Monitor / audit page: job runs from `lm_job_runs` (status, duration, errors, items processed),
+      data freshness per source and account, warning banner when ingest or curator failed or data is
+      stale (REQUIREMENTS §8.1 Audit).
