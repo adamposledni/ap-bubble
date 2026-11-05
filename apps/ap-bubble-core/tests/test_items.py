@@ -1,17 +1,8 @@
 import sqlite3
 from typing import Any
 
-import pytest
-
 from bubble_core.accounts import Account
 from bubble_core.items import Item, flag_deleted, flag_missing_deleted, save_item
-from bubble_core.job_log import job_run
-
-
-@pytest.fixture
-def run_id(conn: sqlite3.Connection) -> int:
-    with job_run(conn, "test.job") as run:
-        return run.id
 
 
 def _item(external_id: str = "e1", deleted: bool = False, **payload: Any) -> Item:
