@@ -3,12 +3,12 @@
 import os
 from pathlib import Path
 
-APP_NAME = "ap-adams-bubble"
-DATA_DIR_ENV = "ADAMS_BUBBLE_DATA_DIR"
+APP_NAME = "ap-bubble"
+DATA_DIR_ENV = "BUBBLE_DATA_DIR"
 
 
 def data_dir() -> Path:
-    """Root of runtime data: the env override if set, else %LOCALAPPDATA%/ap-adams-bubble."""
+    """Root of runtime data: the env override if set, else %LOCALAPPDATA%/ap-bubble."""
     override = os.environ.get(DATA_DIR_ENV)
     return _ensure(Path(override) if override else _local_app_data() / APP_NAME)
 

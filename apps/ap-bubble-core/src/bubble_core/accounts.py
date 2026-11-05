@@ -4,8 +4,8 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Literal, cast, get_args
 
-from adams_bubble_core.clock import utc_now
-from adams_bubble_core.log import get_logger
+from bubble_core.clock import utc_now
+from bubble_core.log import get_logger
 
 Provider = Literal["google", "microsoft"]
 Context = Literal["work", "personal"]

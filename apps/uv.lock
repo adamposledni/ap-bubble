@@ -8,8 +8,8 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "ap-adams-bubble-core",
-    "ap-adams-bubble-ingest",
+    "ap-bubble-core",
+    "ap-bubble-ingest",
 ]
 
 [manifest.dependency-groups]
@@ -19,9 +19,9 @@ dev = [
 ]
 
 [[package]]
-name = "ap-adams-bubble-core"
+name = "ap-bubble-core"
 version = "0.1.0"
-source = { editable = "ap-adams-bubble-core" }
+source = { editable = "ap-bubble-core" }
 dependencies = [
     { name = "keyring" },
 ]
@@ -30,11 +30,11 @@ dependencies = [
 requires-dist = [{ name = "keyring", specifier = ">=25.7.0" }]
 
 [[package]]
-name = "ap-adams-bubble-ingest"
+name = "ap-bubble-ingest"
 version = "0.1.0"
-source = { editable = "ap-adams-bubble-ingest" }
+source = { editable = "ap-bubble-ingest" }
 dependencies = [
-    { name = "ap-adams-bubble-core" },
+    { name = "ap-bubble-core" },
     { name = "google-auth" },
     { name = "google-auth-oauthlib" },
     { name = "requests" },
@@ -42,7 +42,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ap-adams-bubble-core", editable = "ap-adams-bubble-core" },
+    { name = "ap-bubble-core", editable = "ap-bubble-core" },
     { name = "google-auth", specifier = ">=2.62.1" },
     { name = "google-auth-oauthlib", specifier = ">=1.5.0" },
     { name = "requests", specifier = ">=2.34.2" },

@@ -2,11 +2,11 @@
 
 from contextlib import closing
 
-from adams_bubble_core.accounts import Account, Context, account_key, upsert_account
-from adams_bubble_core.db import open_vault
-from adams_bubble_core.log import get_logger
-from adams_bubble_core.token_store import save_refresh_token
-from adams_bubble_ingest.google import auth as google_auth
+from bubble_core.accounts import Account, Context, account_key, upsert_account
+from bubble_core.db import open_vault
+from bubble_core.log import get_logger
+from bubble_core.token_store import save_refresh_token
+from bubble_ingest.google import auth as google_auth
 
 logger = get_logger(__name__)
 

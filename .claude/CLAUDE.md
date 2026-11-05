@@ -1,4 +1,4 @@
-# ap-adams-bubble
+# ap-bubble
 
 Personal "second brain" over work (Microsoft) and personal (Google) data, running locally.
 Personal project, not a DataBrothers one: DBI standards, brand and skills do not apply.
@@ -11,9 +11,9 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
 
 ## Repo structure
 - `apps/<component>/`: one folder per component (api, job, web app, ...); all code lives here, packages included.
-- Components and external resources keep the `ap` prefix: `ap-adams-bubble[-<name>]` (app folders such as
-  `apps/ap-adams-bubble-core`, package names, the data folder, Google Cloud project, scheduled tasks, credential entries).
-- Code drops it: Python modules `adams_bubble_<name>`, env vars `ADAMS_BUBBLE_*`, constants, identifiers.
+- Components and external resources keep the `ap` prefix: `ap-bubble[-<name>]` (app folders such as
+  `apps/ap-bubble-core`, package names, the data folder, Google Cloud project, scheduled tasks, credential entries).
+- Code drops it: Python modules `bubble_<name>`, env vars `BUBBLE_*`, constants, identifiers.
 - SQLite tables are prefixed by data layer: `l0_` ingestion, `l1_` input, `l2_` curated, `l3_` actions,
   `lm_` metadata (see `other/REQUIREMENTS.md` §3).
 - `tools/<script>.ps1`: scripts for me (run dev server, deploy, ...); may be empty.
@@ -25,11 +25,12 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
 - Storage: SQLite.
 
 ## Runtime data and accounts
-- Runtime data lives outside the repo in `%LOCALAPPDATA%\ap-adams-bubble\` (database, inbox attachments, logs).
+- Runtime data lives outside the repo in `%LOCALAPPDATA%\ap-bubble\` (database, inbox attachments, logs).
 - Microsoft and Google are connected data sources only, never the app's identity provider.
 - OAuth tokens are stored in Windows Credential Manager.
 
 ## Development style
+- Communicate briefly: answer first, short, no long explanations unless asked.
 - Do not estimate; ask me.
 - When asking several questions, number them, or start briefly and discuss them one by one.
 - Never run tests without asking first (FE tests are slow and can hang).

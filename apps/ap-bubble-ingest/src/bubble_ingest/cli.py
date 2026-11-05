@@ -4,12 +4,12 @@ import argparse
 from collections.abc import Callable
 from contextlib import closing
 
-from adams_bubble_core.accounts import CONTEXTS, list_accounts
-from adams_bubble_core.db import open_vault
-from adams_bubble_core.log import get_logger, setup_logging
-from adams_bubble_ingest.connect import connect_google
+from bubble_core.accounts import CONTEXTS, list_accounts
+from bubble_core.db import open_vault
+from bubble_core.log import get_logger, setup_logging
+from bubble_ingest.connect import connect_google
 
-APP_NAME = "ap-adams-bubble-ingest"
+APP_NAME = "ap-bubble-ingest"
 CONNECTORS: dict[str, Callable] = {"google": connect_google}
 
 logger = get_logger(__name__)

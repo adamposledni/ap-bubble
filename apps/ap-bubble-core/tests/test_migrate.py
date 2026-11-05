@@ -1,7 +1,7 @@
 from contextlib import closing
 from pathlib import Path
 
-from adams_bubble_core.db import connect, migrate
+from bubble_core.db import connect, migrate
 
 
 def test_migrate_creates_schema_and_sets_version(vault_path: Path) -> None:

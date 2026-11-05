@@ -3,8 +3,8 @@
 import sqlite3
 from pathlib import Path
 
-from adams_bubble_core.log import get_logger
-from adams_bubble_core.paths import db_path
+from bubble_core.log import get_logger
+from bubble_core.paths import db_path
 
 _BUSY_TIMEOUT_SECONDS = 5.0
 

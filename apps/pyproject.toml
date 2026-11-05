@@ -1,8 +1,8 @@
-# uv workspace root for all Python components of ap-adams-bubble.
+# uv workspace root for all Python components of ap-bubble.
 [tool.uv.workspace]
 members = [
-    "ap-adams-bubble-core",
-    "ap-adams-bubble-ingest",
+    "ap-bubble-core",
+    "ap-bubble-ingest",
 ]
 
 [dependency-groups]
@@ -16,8 +16,8 @@ target-version = "py313"
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["adams_bubble_*"]
+known-first-party = ["bubble_*"]
 
 [tool.pytest.ini_options]
-testpaths = ["ap-adams-bubble-*/tests"]
+testpaths = ["ap-bubble-*/tests"]
 addopts = "--import-mode=importlib"

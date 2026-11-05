@@ -4,5 +4,5 @@
 #   .\tools\ingest.ps1 accounts                            # lists connected accounts
 $ErrorActionPreference = "Stop"
 $apps = Join-Path $PSScriptRoot "..\apps"
-uv --directory $apps run ap-adams-bubble-ingest @args
+uv --directory $apps run ap-bubble-ingest @args
 exit $LASTEXITCODE

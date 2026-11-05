@@ -173,14 +173,14 @@ flowchart LR
 | Chat connector | Python MCP server → Claude Desktop |
 | Search | Keyword search (v1) |
 
-**Repositories:** `second-brain` (code) and `second-brain-knowledge` (markdown vault) kept separate.
+**Repositories:** `ap-bubble` (code) and `ap-bubble-knowledge` (markdown vault) kept separate.
 
 **Future:** cloud hosting with usage-based AI (previously considered Cloudflare); split is ready for it since ingest, vault and web app need no AI.
 
 ## 10. Proposed vault layout
 
 ```
-second-brain-knowledge/          # git repo
+ap-bubble-knowledge/             # git repo
 ├── people/
 │   └── petr-novak.md
 ├── places/

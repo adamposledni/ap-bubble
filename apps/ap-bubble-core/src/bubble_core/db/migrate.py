@@ -6,8 +6,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import NamedTuple
 
-from adams_bubble_core.db.connection import connect
-from adams_bubble_core.log import get_logger
+from bubble_core.db.connection import connect
+from bubble_core.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -51,7 +51,7 @@ def _apply_pending(conn: sqlite3.Connection) -> int:
 
 
 def _load_migrations() -> list[Migration]:
-    folder = files("adams_bubble_core.db") / "migrations"
+    folder = files("bubble_core.db") / "migrations"
     migrations = [
         Migration(int(f.name.split("_", 1)[0]), f.name, f.read_text(encoding="utf-8"))
         for f in folder.iterdir()

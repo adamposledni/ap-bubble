@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from adams_bubble_core.accounts import list_accounts, upsert_account
-from adams_bubble_core.db import open_vault
+from bubble_core.accounts import list_accounts, upsert_account
+from bubble_core.db import open_vault
 
 
 @pytest.fixture

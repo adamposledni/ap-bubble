@@ -5,8 +5,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from adams_bubble_core.clock import utc_now
-from adams_bubble_core.log import get_logger
+from bubble_core.clock import utc_now
+from bubble_core.log import get_logger
 
 logger = get_logger(__name__)
 

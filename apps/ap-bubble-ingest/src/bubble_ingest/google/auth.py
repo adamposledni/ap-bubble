@@ -7,8 +7,8 @@ from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from adams_bubble_core.log import get_logger
-from adams_bubble_core.paths import data_dir
+from bubble_core.log import get_logger
+from bubble_core.paths import data_dir
 
 CLIENT_FILE_NAME = "google-client.json"
 USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"

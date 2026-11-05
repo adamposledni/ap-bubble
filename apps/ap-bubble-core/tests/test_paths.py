@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from adams_bubble_core import paths
+from bubble_core import paths
 
 
 def test_data_dir_honours_env_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

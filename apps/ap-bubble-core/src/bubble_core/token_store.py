@@ -2,9 +2,9 @@
 
 import keyring
 
-from adams_bubble_core.log import get_logger
+from bubble_core.log import get_logger
 
-SERVICE_NAME = "ap-adams-bubble"
+SERVICE_NAME = "ap-bubble"
 
 logger = get_logger(__name__)
 

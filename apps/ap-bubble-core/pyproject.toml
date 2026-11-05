@@ -1,7 +1,7 @@
 [project]
-name = "ap-adams-bubble-core"
+name = "ap-bubble-core"
 version = "0.1.0"
-description = "Shared paths, logging and vault storage for ap-adams-bubble components."
+description = "Shared paths, logging and vault storage for ap-bubble components."
 requires-python = ">=3.13"
 dependencies = [
     "keyring>=25.7.0",
@@ -12,4 +12,4 @@ requires = ["uv_build>=0.12.23,<0.13.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "adams_bubble_core"
+module-name = "bubble_core"
