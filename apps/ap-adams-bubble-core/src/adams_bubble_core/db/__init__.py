@@ -3,8 +3,8 @@
 import sqlite3
 from pathlib import Path
 
-from ap_adams_bubble_core.db.connection import connect
-from ap_adams_bubble_core.db.migrate import migrate
+from adams_bubble_core.db.connection import connect
+from adams_bubble_core.db.migrate import migrate
 
 __all__ = ["connect", "migrate", "open_vault"]
 

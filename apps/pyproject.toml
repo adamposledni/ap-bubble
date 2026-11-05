@@ -15,7 +15,7 @@ target-version = "py313"
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["ap_adams_bubble_*"]
+known-first-party = ["adams_bubble_*"]
 
 [tool.pytest.ini_options]
 testpaths = ["ap-adams-bubble-*/tests"]

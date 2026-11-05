@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 APP_NAME = "ap-adams-bubble"
-DATA_DIR_ENV = "AP_ADAMS_BUBBLE_DATA_DIR"
+DATA_DIR_ENV = "ADAMS_BUBBLE_DATA_DIR"
 
 
 def data_dir() -> Path:

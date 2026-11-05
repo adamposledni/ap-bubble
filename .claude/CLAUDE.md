@@ -11,7 +11,8 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
 
 ## Repo structure
 - `apps/<component>/`: one folder per component (api, job, web app, ...); all code lives here, packages included.
-- Component naming: `ap-adams-bubble-<name>` (e.g. `apps/ap-adams-bubble-core`); Python import name `ap_adams_bubble_<name>`.
+- Component naming: `ap-adams-bubble-<name>` (e.g. `apps/ap-adams-bubble-core`).
+- `ap` is only my project prefix; drop it in code: Python modules `adams_bubble_<name>`, env vars `ADAMS_BUBBLE_*`.
 - `tools/<script>.ps1`: scripts for me (run dev server, deploy, ...); may be empty.
 - Root holds only `.claude/CLAUDE.md`, `.gitignore`, `apps/`, `tools/`, `other/` (requirements, notes).
 

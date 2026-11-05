@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from ap_adams_bubble_core.log import get_logger
+from adams_bubble_core.log import get_logger
 
 logger = get_logger(__name__)
 

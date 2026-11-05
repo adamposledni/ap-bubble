@@ -5,10 +5,10 @@ import os
 from logging.handlers import RotatingFileHandler
 from typing import Any, cast
 
-from ap_adams_bubble_core.paths import logs_dir
+from adams_bubble_core.paths import logs_dir
 
 TRACE = 5
-LOG_LEVEL_ENV = "AP_ADAMS_BUBBLE_LOG_LEVEL"
+LOG_LEVEL_ENV = "ADAMS_BUBBLE_LOG_LEVEL"
 _FORMAT = "%(asctime)s %(levelname)-5s %(name)s: %(message)s"
 _MAX_FILE_BYTES = 5 * 1024 * 1024
 _BACKUP_FILES = 5
@@ -31,7 +31,7 @@ def get_logger(name: str) -> TraceLogger:
 def setup_logging(app_name: str) -> None:
     """Log to the console and to a rotating file <logs>/<app_name>.log.
 
-    The level comes from AP_ADAMS_BUBBLE_LOG_LEVEL (TRACE, DEBUG, INFO, ...), default INFO.
+    The level comes from ADAMS_BUBBLE_LOG_LEVEL (TRACE, DEBUG, INFO, ...), default INFO.
     """
     formatter = logging.Formatter(_FORMAT)
     handlers: list[logging.Handler] = [logging.StreamHandler(), _file_handler(app_name)]

@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from ap_adams_bubble_core.db import open_vault
-from ap_adams_bubble_core.job_log import job_run
+from adams_bubble_core.db import open_vault
+from adams_bubble_core.job_log import job_run
 
 
 @pytest.fixture
