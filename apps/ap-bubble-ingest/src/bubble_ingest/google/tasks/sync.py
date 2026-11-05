@@ -16,8 +16,13 @@ from bubble_core.job_log import job_run
 from bubble_core.log import get_logger
 from bubble_ingest.google import auth as google_auth
 from bubble_ingest.google.tasks import api
-from bubble_ingest.google.tasks.mapping import SOURCE, to_item
-from bubble_ingest.l0_sync import ContainerChanges, sync_accounts, sync_container
+from bubble_ingest.google.tasks.mapping import SOURCE, tasklist_to_item, to_item
+from bubble_ingest.l0_sync import (
+    ContainerChanges,
+    save_containers,
+    sync_accounts,
+    sync_container,
+)
 
 JOB_NAME = f"ingest.{SOURCE}"
 # Covers clock skew between this PC and Google, and tasks written while a fetch runs.
@@ -33,7 +38,9 @@ def sync_all(conn: sqlite3.Connection) -> None:
 def sync_account(conn: sqlite3.Connection, account: Account) -> None:
     with job_run(conn, JOB_NAME, account.key) as run:
         session = google_auth.session_for(account.key)
-        for tasklist in api.list_tasklists(session):
+        tasklists = api.list_tasklists(session)
+        save_containers(conn, account, SOURCE, [tasklist_to_item(t) for t in tasklists], run)
+        for tasklist in tasklists:
             fetch = partial(_fetch_changes, session, tasklist["id"])
             sync_container(conn, account, SOURCE, tasklist["id"], fetch, run)
 

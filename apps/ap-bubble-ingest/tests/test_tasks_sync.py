@@ -28,7 +28,8 @@ class FakeTasksApi:
 def fake_api(monkeypatch: pytest.MonkeyPatch) -> FakeTasksApi:
     fake = FakeTasksApi()
     monkeypatch.setattr(google_auth, "session_for", lambda account_key: object())
-    monkeypatch.setattr(api, "list_tasklists", lambda session: [{"id": "list1"}])
+    tasklists = [{"id": "list1", "title": "My list"}]
+    monkeypatch.setattr(api, "list_tasklists", lambda session: tasklists)
     monkeypatch.setattr(api, "list_tasks", fake.list_tasks)
     return fake
 
@@ -38,7 +39,7 @@ def _task(task_id: str, deleted: bool = False) -> dict[str, Any]:
 
 
 def _deleted_flags(conn: sqlite3.Connection) -> dict[str, int]:
-    rows = conn.execute("SELECT external_id, deleted FROM l0_items").fetchall()
+    rows = conn.execute("SELECT external_id, deleted FROM l0_items WHERE kind = 'task'").fetchall()
     return {row["external_id"]: row["deleted"] for row in rows}
 
 
@@ -90,6 +91,15 @@ def test_task_deleted_in_google_is_flagged_deleted(
     sync_account(conn, account)
 
     assert _deleted_flags(conn) == {"t1": 0, "t2": 1}
+
+
+def test_task_lists_are_saved_as_items(
+    conn: sqlite3.Connection, account: Account, fake_api: FakeTasksApi
+) -> None:
+    sync_account(conn, account)
+
+    row = conn.execute("SELECT * FROM l0_items WHERE kind = 'tasklist'").fetchone()
+    assert (row["container_id"], row["external_id"], row["title"]) == ("", "list1", "My list")
 
 
 def test_sync_is_recorded_as_job_run(

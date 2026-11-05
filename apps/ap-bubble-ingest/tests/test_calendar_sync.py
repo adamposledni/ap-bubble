@@ -14,6 +14,10 @@ class FakeCalendarApi:
     """Serves scripted events for every calendar and records (calendar_id, sync_token) requests."""
 
     def __init__(self) -> None:
+        self.calendars = [
+            {"id": "cal", "accessRole": "owner", "summary": "Mine"},
+            {"id": "busy", "accessRole": "freeBusyReader"},
+        ]
         self.events: list[dict[str, Any]] = []
         self.token_expired = False
         self.requests: list[tuple[str, str | None]] = []
@@ -30,12 +34,8 @@ class FakeCalendarApi:
 @pytest.fixture
 def fake_api(monkeypatch: pytest.MonkeyPatch) -> FakeCalendarApi:
     fake = FakeCalendarApi()
-    calendars = [
-        {"id": "cal", "accessRole": "owner"},
-        {"id": "busy", "accessRole": "freeBusyReader"},
-    ]
     monkeypatch.setattr(google_auth, "session_for", lambda account_key: object())
-    monkeypatch.setattr(api, "list_calendars", lambda session: calendars)
+    monkeypatch.setattr(api, "list_calendars", lambda session: fake.calendars)
     monkeypatch.setattr(api, "list_events", fake.list_events)
     return fake
 
@@ -45,7 +45,11 @@ def _event(event_id: str) -> dict[str, Any]:
 
 
 def _deleted_flags(conn: sqlite3.Connection) -> dict[str, int]:
-    rows = conn.execute("SELECT external_id, deleted FROM l0_items").fetchall()
+    return _flags(conn, "event")
+
+
+def _flags(conn: sqlite3.Connection, kind: str) -> dict[str, int]:
+    rows = conn.execute("SELECT external_id, deleted FROM l0_items WHERE kind = ?", (kind,))
     return {row["external_id"]: row["deleted"] for row in rows}
 
 
@@ -81,6 +85,18 @@ def test_expired_token_falls_back_to_full_load_and_flags_missing_events(
 
     assert fake_api.requests[1:] == [("cal", "token-1"), ("cal", None)]
     assert _deleted_flags(conn) == {"e1": 0, "e2": 1}
+
+
+def test_readable_calendars_are_saved_and_removed_ones_flagged(
+    conn: sqlite3.Connection, account: Account, fake_api: FakeCalendarApi
+) -> None:
+    sync_account(conn, account)
+    assert _flags(conn, "calendar") == {"cal": 0}
+
+    fake_api.calendars = []
+    sync_account(conn, account)
+
+    assert _flags(conn, "calendar") == {"cal": 1}
 
 
 def test_sync_is_recorded_as_job_run(

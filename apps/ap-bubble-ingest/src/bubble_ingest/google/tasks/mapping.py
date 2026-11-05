@@ -3,9 +3,25 @@
 from typing import Any
 
 from bubble_core.items import Item
+from bubble_ingest.l0_sync import CONTAINER_LIST_ID
 
 SOURCE = "google_tasks"
 KIND = "task"
+TASKLIST_KIND = "tasklist"
+
+
+def tasklist_to_item(tasklist: dict[str, Any]) -> Item:
+    return Item(
+        source=SOURCE,
+        container_id=CONTAINER_LIST_ID,
+        external_id=tasklist["id"],
+        kind=TASKLIST_KIND,
+        title=tasklist.get("title"),
+        starts_at=None,
+        ends_at=None,
+        deleted=False,
+        payload=tasklist,
+    )
 
 
 def to_item(tasklist_id: str, task: dict[str, Any]) -> Item:

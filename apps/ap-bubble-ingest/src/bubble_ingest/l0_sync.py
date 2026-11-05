@@ -10,6 +10,8 @@ from bubble_core.job_log import JobRun
 from bubble_core.log import get_logger
 from bubble_core.sync_cursors import load_cursor, save_cursor
 
+CONTAINER_LIST_ID = ""  # container of the items that describe a source's containers
+
 logger = get_logger(__name__)
 
 
@@ -44,6 +46,17 @@ def sync_accounts(
             failed.append(account.key)
     if failed:
         raise RuntimeError(f"Sync failed for {failed}")
+
+
+def save_containers(
+    conn: sqlite3.Connection, account: Account, source: str, containers: list[Item], run: JobRun
+) -> None:
+    """Save the containers themselves (calendars, task lists); flag removed ones; commit."""
+    changed = sum(save_item(conn, account.id, item, run.id) for item in containers)
+    seen = {item.external_id for item in containers}
+    changed += flag_missing_deleted(conn, account.id, source, CONTAINER_LIST_ID, seen, run.id)
+    conn.commit()
+    logger.debug("%s: %d containers, %d changed", source, len(containers), changed)
 
 
 def sync_container(
