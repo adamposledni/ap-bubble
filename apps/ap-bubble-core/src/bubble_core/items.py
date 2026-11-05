@@ -68,6 +68,27 @@ def flag_missing_deleted(
     return len(missing)
 
 
+def flag_deleted(
+    conn: sqlite3.Connection,
+    account_id: int,
+    source: str,
+    container_id: str,
+    external_ids: list[str],
+    run_id: int,
+) -> int:
+    """Flag known items as deleted, keeping their content; unknown ids are skipped (no rows)."""
+    now = utc_now()
+    cursor = conn.executemany(
+        "UPDATE l0_items SET deleted = 1, changed_run_id = ?, changed_at = ? "
+        "WHERE account_id = ? AND source = ? AND container_id = ? AND external_id = ? "
+        "AND deleted = 0",
+        [(run_id, now, account_id, source, container_id, eid) for eid in external_ids],
+    )
+    flagged = cursor.rowcount  # summed over all ids
+    logger.debug("Flagged %d of %d %s items as deleted", flagged, len(external_ids), source)
+    return flagged
+
+
 def _serialize(payload: dict[str, Any]) -> tuple[str, str]:
     text = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return text, hashlib.sha256(text.encode("utf-8")).hexdigest()

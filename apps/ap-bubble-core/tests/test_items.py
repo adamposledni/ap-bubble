@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 
 from bubble_core.accounts import Account
-from bubble_core.items import Item, flag_missing_deleted, save_item
+from bubble_core.items import Item, flag_deleted, flag_missing_deleted, save_item
 from bubble_core.job_log import job_run
 
 
@@ -88,3 +88,16 @@ def test_flag_missing_deleted_flags_only_unseen_items(
 
     assert flag_missing_deleted(conn, account.id, "test", "c1", {"e1"}, run_id) == 1
     assert (_row(conn, "e1")["deleted"], _row(conn, "e2")["deleted"]) == (0, 1)
+
+
+def test_flag_deleted_flags_known_items_and_skips_unknown_ones(
+    conn: sqlite3.Connection, account: Account, run_id: int
+) -> None:
+    save_item(conn, account.id, _item("e1", summary="Lunch"), run_id)
+    save_item(conn, account.id, _item("e2"), run_id)
+
+    assert flag_deleted(conn, account.id, "test", "c1", ["e1", "unknown"], run_id) == 1
+    assert flag_deleted(conn, account.id, "test", "c1", ["e1"], run_id) == 0
+    assert (_row(conn, "e1")["deleted"], _row(conn, "e1")["title"]) == (1, "Lunch")
+    assert _row(conn, "e2")["deleted"] == 0
+    assert _row(conn, "unknown") is None
