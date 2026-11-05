@@ -33,6 +33,10 @@
 
 ## Web UI
 
+- [ ] Run the web app without dev servers: build the UI and serve it from the API (one process),
+      started at logon (e.g. Task Scheduler) instead of `tools/web.ps1`.
+- [ ] Overview reads L0 directly; switch it to the curated layer (L2) once it exists.
+
 - [ ] Monitor / audit page: job runs from `lm_job_runs` (status, duration, errors, items processed),
       data freshness per source and account, warning banner when ingest or curator failed or data is
       stale (REQUIREMENTS §8.1 Audit).

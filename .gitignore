@@ -16,9 +16,10 @@ dist/
 .env.*
 !.env.example
 
-# Claude Code local settings and agent worktrees
+# Claude Code local settings, agent worktrees and browser-check output
 .claude/settings.local.json
 .claude/worktrees/
+.playwright-mcp/
 
 # IDE / OS
 .idea/
