@@ -16,8 +16,9 @@ dist/
 .env.*
 !.env.example
 
-# Claude Code local settings
+# Claude Code local settings and agent worktrees
 .claude/settings.local.json
+.claude/worktrees/
 
 # IDE / OS
 .idea/

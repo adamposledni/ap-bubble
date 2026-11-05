@@ -8,4 +8,8 @@
 - [ ] Google Calendar: calendars removed from the calendar list keep their L0 items; flag them deleted.
 - [ ] Recurring events sit in L0 as series + exceptions; expand them into occurrences where
       dashboard / MCP queries need them.
+- [ ] Google Tasks: task lists deleted in Google keep their L0 items; flag them deleted.
+- [ ] Google Tasks: incremental sync (`updatedMin`) never sees tasks that vanish without a deleted
+      flag (e.g. moved to another list, or purged while sync was paused); add a periodic full load
+      (delete the `google_tasks` rows in `lm_sync_cursors`).
 - [ ] Schedule ingest jobs (Windows Task Scheduler).
