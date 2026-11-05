@@ -1,12 +1,17 @@
 # uv workspace root for all Python components of ap-bubble.
 [tool.uv.workspace]
 members = [
+    "ap-bubble-api",
     "ap-bubble-core",
     "ap-bubble-ingest",
 ]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.7"]
+dev = [
+    "httpx2>=2.16.0",
+    "pytest>=8",
+    "ruff>=0.7",
+]
 
 [tool.ruff]
 line-length = 100
