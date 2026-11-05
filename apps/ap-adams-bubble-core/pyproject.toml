@@ -3,7 +3,9 @@ name = "ap-adams-bubble-core"
 version = "0.1.0"
 description = "Shared paths, logging and vault storage for ap-adams-bubble components."
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "keyring>=25.7.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13.0"]

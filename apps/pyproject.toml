@@ -2,6 +2,7 @@
 [tool.uv.workspace]
 members = [
     "ap-adams-bubble-core",
+    "ap-adams-bubble-ingest",
 ]
 
 [dependency-groups]

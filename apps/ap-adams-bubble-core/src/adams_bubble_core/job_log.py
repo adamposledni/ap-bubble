@@ -4,8 +4,8 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
 
+from adams_bubble_core.clock import utc_now
 from adams_bubble_core.log import get_logger
 
 logger = get_logger(__name__)
@@ -42,7 +42,7 @@ def job_run(conn: sqlite3.Connection, job_name: str, scope: str | None = None) -
 def _start(conn: sqlite3.Connection, job_name: str, scope: str | None) -> JobRun:
     cursor = conn.execute(
         "INSERT INTO lm_job_runs (job_name, scope, status, started_at) VALUES (?, ?, 'running', ?)",
-        (job_name, scope, _now()),
+        (job_name, scope, utc_now()),
     )
     conn.commit()
     run = JobRun(id=cursor.lastrowid or 0, job_name=job_name, scope=scope)
@@ -54,10 +54,6 @@ def _finish(conn: sqlite3.Connection, run: JobRun, status: str, error: str | Non
     conn.execute(
         "UPDATE lm_job_runs SET status = ?, finished_at = ?, items_processed = ?, error = ? "
         "WHERE id = ?",
-        (status, _now(), run.items_processed, error, run.id),
+        (status, utc_now(), run.items_processed, error, run.id),
     )
     conn.commit()
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds")
