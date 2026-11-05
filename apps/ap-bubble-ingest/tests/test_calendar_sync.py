@@ -7,6 +7,7 @@ from bubble_core.accounts import Account
 from bubble_ingest.google import auth as google_auth
 from bubble_ingest.google.calendar import api
 from bubble_ingest.google.calendar.sync import sync_account
+from bubble_ingest.l0_sync import CursorExpired
 
 
 class FakeCalendarApi:
@@ -22,7 +23,7 @@ class FakeCalendarApi:
     ) -> api.EventChanges:
         self.requests.append((calendar_id, sync_token))
         if sync_token and self.token_expired:
-            raise api.SyncTokenExpired(calendar_id)
+            raise CursorExpired(calendar_id)
         return api.EventChanges(list(self.events), f"token-{len(self.requests)}")
 
 

@@ -4,22 +4,18 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
 
+import requests
 from google.auth.transport.requests import AuthorizedSession
 
 from bubble_core.log import get_logger
+from bubble_ingest.google.http import Json, get_all_pages
+from bubble_ingest.l0_sync import CursorExpired
 
 BASE_URL = "https://www.googleapis.com/calendar/v3"
 _PAGE_SIZE = 2500  # API maximum
-_HTTP_TIMEOUT_SECONDS = 30
-_HTTP_GONE = 410
-
-type Json = dict[str, Any]
+_HTTP_GONE = 410  # sync token no longer valid
 
 logger = get_logger(__name__)
-
-
-class SyncTokenExpired(Exception):
-    """The sync token is no longer valid; the calendar needs a full load."""
 
 
 @dataclass(frozen=True)
@@ -29,7 +25,7 @@ class EventChanges:
 
 
 def list_calendars(session: AuthorizedSession) -> list[Json]:
-    calendars, _ = _get_all_pages(session, f"{BASE_URL}/users/me/calendarList", {})
+    calendars, _ = get_all_pages(session, f"{BASE_URL}/users/me/calendarList", {})
     logger.debug("Fetched %d calendars", len(calendars))
     return calendars
 
@@ -40,6 +36,7 @@ def list_events(
     """Events changed since sync_token, or all events from time_min on when there is no token.
 
     Recurring events come as the series plus its exceptions (not expanded); cancelled included.
+    Raises CursorExpired when Google no longer accepts the sync token.
     """
     params: dict[str, Any] = {"maxResults": _PAGE_SIZE, "showDeleted": "true"}
     if sync_token:
@@ -47,28 +44,10 @@ def list_events(
     else:
         params["timeMin"] = time_min
     url = f"{BASE_URL}/calendars/{quote(calendar_id, safe='')}/events"
-    events, last_page = _get_all_pages(session, url, params)
+    try:
+        events, last_page = get_all_pages(session, url, params)
+    except requests.HTTPError as error:
+        if error.response is not None and error.response.status_code == _HTTP_GONE:
+            raise CursorExpired(calendar_id) from error
+        raise
     return EventChanges(events, last_page["nextSyncToken"])
-
-
-def _get_all_pages(
-    session: AuthorizedSession, url: str, params: dict[str, Any]
-) -> tuple[list[Json], Json]:
-    """Follow nextPageToken; return all items and the last page (it holds nextSyncToken)."""
-    items: list[Json] = []
-    params = dict(params)
-    while True:
-        page = _get(session, url, params)
-        items.extend(page.get("items", []))
-        if "nextPageToken" not in page:
-            return items, page
-        params["pageToken"] = page["nextPageToken"]
-
-
-def _get(session: AuthorizedSession, url: str, params: dict[str, Any]) -> Json:
-    response = session.get(url, params=params, timeout=_HTTP_TIMEOUT_SECONDS)
-    logger.trace("GET %s -> %d", url, response.status_code)
-    if response.status_code == _HTTP_GONE:
-        raise SyncTokenExpired(url)
-    response.raise_for_status()
-    return response.json()
