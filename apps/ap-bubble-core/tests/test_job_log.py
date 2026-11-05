@@ -1,18 +1,8 @@
 import sqlite3
-from collections.abc import Iterator
-from contextlib import closing
-from pathlib import Path
 
 import pytest
 
-from bubble_core.db import open_vault
 from bubble_core.job_log import job_run
-
-
-@pytest.fixture
-def conn(vault_path: Path) -> Iterator[sqlite3.Connection]:
-    with closing(open_vault(vault_path)) as conn:
-        yield conn
 
 
 def _only_run(conn: sqlite3.Connection) -> sqlite3.Row:

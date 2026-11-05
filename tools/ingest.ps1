@@ -2,6 +2,7 @@
 # Examples:
 #   .\tools\ingest.ps1 connect google --context personal   # opens a browser login
 #   .\tools\ingest.ps1 accounts                            # lists connected accounts
+#   .\tools\ingest.ps1 sync google_calendar                # ingests calendar changes into L0
 $ErrorActionPreference = "Stop"
 $apps = Join-Path $PSScriptRoot "..\apps"
 uv --directory $apps run ap-bubble-ingest @args

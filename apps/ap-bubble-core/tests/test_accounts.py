@@ -1,18 +1,6 @@
 import sqlite3
-from collections.abc import Iterator
-from contextlib import closing
-from pathlib import Path
-
-import pytest
 
 from bubble_core.accounts import list_accounts, upsert_account
-from bubble_core.db import open_vault
-
-
-@pytest.fixture
-def conn(vault_path: Path) -> Iterator[sqlite3.Connection]:
-    with closing(open_vault(vault_path)) as conn:
-        yield conn
 
 
 def test_upsert_adds_account_with_lower_case_email(conn: sqlite3.Connection) -> None:

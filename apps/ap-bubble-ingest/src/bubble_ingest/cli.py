@@ -1,6 +1,7 @@
-"""Command line of the ingest component: connect and list accounts (sync commands follow)."""
+"""Command line of the ingest component: connect and list accounts, sync sources into L0."""
 
 import argparse
+import sqlite3
 from collections.abc import Callable
 from contextlib import closing
 
@@ -8,9 +9,13 @@ from bubble_core.accounts import CONTEXTS, list_accounts
 from bubble_core.db import open_vault
 from bubble_core.log import get_logger, setup_logging
 from bubble_ingest.connect import connect_google
+from bubble_ingest.google.calendar import sync as google_calendar
 
 APP_NAME = "ap-bubble-ingest"
 CONNECTORS: dict[str, Callable] = {"google": connect_google}
+SYNCS: dict[str, Callable[[sqlite3.Connection], None]] = {
+    "google_calendar": google_calendar.sync_all,
+}
 
 logger = get_logger(__name__)
 
@@ -36,6 +41,10 @@ def _parser() -> argparse.ArgumentParser:
 
     accounts = commands.add_parser("accounts", help="list connected accounts")
     accounts.set_defaults(handler=lambda _: _print_accounts())
+
+    sync = commands.add_parser("sync", help="ingest a source's changes into L0, all accounts")
+    sync.add_argument("source", choices=SYNCS)
+    sync.set_defaults(handler=lambda args: _run_sync(args.source))
     return parser
 
 
@@ -43,3 +52,8 @@ def _print_accounts() -> None:
     with closing(open_vault()) as conn:
         for account in list_accounts(conn):
             print(f"{account.id:>3}  {account.key:<45} {account.context}")
+
+
+def _run_sync(source: str) -> None:
+    with closing(open_vault()) as conn:
+        SYNCS[source](conn)

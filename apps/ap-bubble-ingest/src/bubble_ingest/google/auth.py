@@ -1,5 +1,6 @@
-"""Google OAuth: browser login for connecting an account (read-only scopes)."""
+"""Google OAuth: browser login to connect an account, sessions for connected ones (read-only)."""
 
+import json
 import os
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 from bubble_core.log import get_logger
 from bubble_core.paths import data_dir
+from bubble_core.token_store import load_refresh_token
 
 CLIENT_FILE_NAME = "google-client.json"
 USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
@@ -36,6 +38,22 @@ def login() -> tuple[str, Credentials]:
     email = _email_of(credentials)
     logger.info("Google login succeeded for %s", email)
     return email, credentials
+
+
+def session_for(account_key: str) -> AuthorizedSession:
+    """HTTP session of a connected account, authorised by its stored refresh token."""
+    client = json.loads(client_file().read_text(encoding="utf-8"))["installed"]
+    credentials = Credentials.from_authorized_user_info(
+        {
+            "refresh_token": load_refresh_token(account_key),
+            "client_id": client["client_id"],
+            "client_secret": client["client_secret"],
+            "token_uri": client["token_uri"],
+        },
+        SCOPES,
+    )
+    logger.debug("Google session ready for %s", account_key)
+    return AuthorizedSession(credentials)
 
 
 def client_file() -> Path:

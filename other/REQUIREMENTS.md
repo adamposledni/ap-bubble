@@ -110,7 +110,7 @@ flowchart LR
 - One job per source type, parameterised by account (multi-account).
 - Incremental via delta queries / sync tokens; store cursor per account + source.
 - **Full-load sources:** pull full set → row hash compare → emit inserts/updates/deletes. Curator only sees the change set.
-- Writes a change-set marker consumed by the curator.
+- Change set: every L0 row records the ingest run that last changed it (`changed_run_id`); the curator reads rows changed since its last run.
 - Cadence: **every 5–15 min**. Zero token cost.
 - Optional: on-demand refresh (dashboard button) re-runs ingest for a scope, then UI re-reads the vault. UI never fetches directly from source APIs.
 
