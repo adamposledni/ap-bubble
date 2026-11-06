@@ -8,6 +8,16 @@ export async function postForm<T>(path: string, body: FormData): Promise<T> {
   return parse<T>(await fetch(path, { method: 'POST', body }));
 }
 
+export async function postJson<T>(path: string, body?: unknown): Promise<T> {
+  return parse<T>(
+    await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+  );
+}
+
 export async function remove(path: string): Promise<void> {
   await parse<void>(await fetch(path, { method: 'DELETE' }));
 }

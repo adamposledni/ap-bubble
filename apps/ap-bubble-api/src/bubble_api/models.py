@@ -68,6 +68,11 @@ class InputFileOut(ApiModel):
     size_bytes: int
 
 
+class QuestionOut(ApiModel):
+    id: str
+    text: str
+
+
 class InputOut(ApiModel):
     id: int
     text: str | None

@@ -55,6 +55,11 @@ export interface Monitor {
   queue: Partial<Record<InputStatus, number>>;
 }
 
+export interface Question {
+  id: string;
+  text: string;
+}
+
 export type InputStatus = 'queued' | 'processing' | 'done' | 'failed';
 
 export interface InputFile {

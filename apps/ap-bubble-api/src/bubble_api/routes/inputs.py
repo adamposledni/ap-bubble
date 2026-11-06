@@ -21,8 +21,8 @@ router = APIRouter(prefix="/inputs")
 
 
 @router.get("")
-def get_inputs(conn: Conn) -> list[InputOut]:
-    return [InputOut.model_validate(item) for item in list_inputs(conn)]
+def get_inputs(conn: Conn, include_done: bool = True) -> list[InputOut]:
+    return [InputOut.model_validate(item) for item in list_inputs(conn, include_done=include_done)]
 
 
 @router.post("", status_code=201)
