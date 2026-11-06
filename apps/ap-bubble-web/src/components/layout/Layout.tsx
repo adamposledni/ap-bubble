@@ -1,11 +1,12 @@
 import { AppShell, Burger, Group, NavLink, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconActivity, IconInbox, IconLayoutDashboard } from '@tabler/icons-react';
+import { IconActivity, IconBook, IconInbox, IconLayoutDashboard } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 
 const PAGES = [
   { path: '/', label: 'Overview', icon: IconLayoutDashboard },
+  { path: '/knowledge', label: 'Knowledge', icon: IconBook },
   { path: '/input', label: 'Input', icon: IconInbox },
   { path: '/monitor', label: 'Monitor', icon: IconActivity },
 ];
@@ -36,7 +37,7 @@ export function Layout({ children }: { children: ReactNode }) {
             to={path}
             label={label}
             leftSection={<Icon size={18} stroke={1.5} />}
-            active={pathname === path}
+            active={path === '/' ? pathname === path : pathname.startsWith(path)}
             onClick={close}
           />
         ))}

@@ -73,3 +73,48 @@ export interface InputItem {
   processedAt: string | null;
   files: InputFile[];
 }
+
+export type KnowledgeFolder = 'people' | 'places' | 'topics' | 'me';
+
+/** A piece of a search snippet; match marks the words that matched the query. */
+export interface SnippetPart {
+  text: string;
+  match: boolean;
+}
+
+export interface KnowledgeHit {
+  folder: KnowledgeFolder;
+  slug: string;
+  name: string;
+  tags: string[];
+  updated: string | null; // YYYY-MM-DD
+  snippet: SnippetPart[];
+}
+
+export interface KnowledgeSearch {
+  total: number; // all matches; hits holds at most the limit
+  hits: KnowledgeHit[];
+}
+
+export interface KnowledgeMeta {
+  name: string;
+  aliases: string[];
+  emails: string[];
+  phones: string[];
+  tags: string[];
+  updated: string | null; // YYYY-MM-DD
+}
+
+export interface KnowledgeRef {
+  folder: KnowledgeFolder;
+  slug: string;
+  name: string;
+}
+
+export interface KnowledgeDoc {
+  folder: KnowledgeFolder;
+  slug: string;
+  meta: KnowledgeMeta;
+  body: string; // markdown
+  backlinks: KnowledgeRef[];
+}

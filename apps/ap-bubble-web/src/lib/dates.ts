@@ -47,6 +47,13 @@ export function formatShortDay(day: string): string {
   return shortDayFormat.format(parseDay(day));
 }
 
+const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+
+/** E.g. "6 Nov 2026"; anything but YYYY-MM-DD is returned as is. */
+export function formatDate(day: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? dateFormat.format(parseDay(day)) : day;
+}
+
 export function formatTime(timestamp: string): string {
   return timeFormat.format(new Date(timestamp));
 }
