@@ -5,8 +5,9 @@ import type { Monitor } from '../../api/types';
 
 /** Whether anything waits for the curator: queued inputs and L0 changes past its cursor. */
 export function CurationStatus({ monitor }: { monitor: Monitor }) {
+  const changes = monitor.changesWaiting;
+  if (changes === undefined) return null; // an older API: unknown, so claim nothing
   const inputs = (monitor.queue.queued ?? 0) + (monitor.queue.processing ?? 0);
-  const changes = monitor.changesWaiting ?? 0;
   const waiting = inputs + changes > 0;
 
   return (
