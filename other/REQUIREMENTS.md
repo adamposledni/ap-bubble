@@ -173,6 +173,10 @@ flowchart LR
 | **Input** | Upload text, voice, documents, corrections, quick-capture ideas → L1. |
 | **Audit** | From LM: history of ingest, curator and action runs; status, duration, errors, items processed; data freshness per source/account. |
 
+Dashboard sections (added 2026-11-06):
+- **Insights & reminders** — each item can be replied to with free text; the reply is stored as a new L1 input (linked to the insight) for the curator.
+- **Questions** — curator-generated questions about my data: missing information, unclear or conflicting facts, ambiguous entities (§7). Answering creates a new L1 input; answered/dismissed questions leave the list.
+
 ### 8.2 Chat — MCP connector
 
 - Local Python **MCP server** registered in Claude Desktop.
