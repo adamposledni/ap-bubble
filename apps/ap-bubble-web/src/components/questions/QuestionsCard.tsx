@@ -1,21 +1,21 @@
-import { Badge, Card, Group, Stack, Title } from '@mantine/core';
+import { Badge, Stack, Title } from '@mantine/core';
 
 import type { Question } from '../../api/types';
 import type { ApiState } from '../../hooks/useApi';
 import { Loadable } from '../common/Loadable';
+import { PAGE_LIST_MAX_HEIGHT, ScrollCard } from '../common/ScrollCard';
 import { QuestionItem } from './QuestionItem';
 
-/** Questions the curator could not settle on its own; hidden when there are none. */
+/** Questions the curator could not settle on its own. */
 export function QuestionsCard({ questions }: { questions: ApiState<Question[]> }) {
   const items = questions.data ?? [];
-  if (!questions.error && items.length === 0) return null;
 
   return (
-    <Card withBorder padding="lg">
-      <Group justify="space-between" mb="md">
-        <Title order={3}>Questions</Title>
-        <Badge variant="light">{items.length} open</Badge>
-      </Group>
+    <ScrollCard
+      maxHeight={PAGE_LIST_MAX_HEIGHT}
+      header={<Title order={4}>Questions</Title>}
+      actions={<Badge variant="light">{items.length} open</Badge>}
+    >
       <Loadable loading={questions.loading} error={questions.error} hasData={questions.data !== undefined}>
         <Stack gap="lg">
           {items.map((question) => (
@@ -23,6 +23,6 @@ export function QuestionsCard({ questions }: { questions: ApiState<Question[]> }
           ))}
         </Stack>
       </Loadable>
-    </Card>
+    </ScrollCard>
   );
 }

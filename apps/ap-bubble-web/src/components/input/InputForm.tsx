@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Group, Stack, Text, Textarea, Title } from '@mantine/core';
+import { Alert, Button, Group, Stack, Text, Textarea } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { IconSend } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -35,40 +35,36 @@ export function InputForm({ onAdded }: { onAdded: () => void }) {
   }
 
   return (
-    <Card withBorder padding="lg">
-      <Title order={3} mb="md">
-        New input
-      </Title>
-      <Stack gap="sm">
-        <Textarea
-          placeholder="A note, a fact, a correction, an idea…"
-          autosize
-          minRows={3}
-          maxRows={12}
-          value={text}
-          onChange={(event) => setText(event.currentTarget.value)}
-          onKeyDown={getHotkeyHandler([['mod+Enter', submit]])}
-        />
-        <FileDrop onDrop={(dropped) => setFiles((current) => [...current, ...dropped])} />
-        <SelectedFiles
-          files={files}
-          onRemove={(index) => setFiles((current) => current.filter((_, i) => i !== index))}
-        />
-        {error && <Alert color="red">{error}</Alert>}
-        <Group justify="space-between">
-          <Text size="xs" c="dimmed">
-            Ctrl+Enter to add
-          </Text>
-          <Button
-            onClick={submit}
-            loading={sending}
-            disabled={!canSend}
-            leftSection={<IconSend size={16} />}
-          >
-            Add to queue
-          </Button>
-        </Group>
-      </Stack>
-    </Card>
+    <Stack gap="sm">
+      <Textarea
+        placeholder="A note, a fact, a correction, an idea…"
+        autosize
+        minRows={3}
+        maxRows={12}
+        data-autofocus
+        value={text}
+        onChange={(event) => setText(event.currentTarget.value)}
+        onKeyDown={getHotkeyHandler([['mod+Enter', submit]])}
+      />
+      <FileDrop onDrop={(dropped) => setFiles((current) => [...current, ...dropped])} />
+      <SelectedFiles
+        files={files}
+        onRemove={(index) => setFiles((current) => current.filter((_, i) => i !== index))}
+      />
+      {error && <Alert color="red">{error}</Alert>}
+      <Group justify="space-between">
+        <Text size="xs" c="dimmed">
+          Ctrl+Enter to add
+        </Text>
+        <Button
+          onClick={submit}
+          loading={sending}
+          disabled={!canSend}
+          leftSection={<IconSend size={16} />}
+        >
+          Add to queue
+        </Button>
+      </Group>
+    </Stack>
   );
 }

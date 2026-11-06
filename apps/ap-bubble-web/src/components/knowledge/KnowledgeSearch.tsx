@@ -7,7 +7,7 @@ import { useKnowledgeSearch } from '../../hooks/useKnowledgeSearch';
 import type { DocRef } from '../../lib/knowledge';
 import { KnowledgeDialog } from './KnowledgeDialog';
 
-/** Search bar that opens the knowledge dialog (also Ctrl+K); the search survives closing it. */
+/** Search bar that opens the knowledge dialog (also Ctrl+K); closing it clears the search text. */
 export function KnowledgeSearch() {
   const [opened, { open, close }] = useDisclosure(false);
   const [doc, setDoc] = useState<DocRef | null>(null);
@@ -17,6 +17,7 @@ export function KnowledgeSearch() {
   const onClose = () => {
     close();
     setDoc(null);
+    search.setInput('');
   };
 
   return (

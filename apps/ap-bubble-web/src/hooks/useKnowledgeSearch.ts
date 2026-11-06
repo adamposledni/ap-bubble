@@ -7,7 +7,7 @@ import { useApi } from './useApi';
 
 const DEBOUNCE_MS = 300;
 
-/** Knowledge search state, kept while the dialog is closed so reopening restores it. */
+/** Knowledge search state: the text, the folder filter and the debounced API result. */
 export function useKnowledgeSearch() {
   const [input, setInput] = useState('');
   const [folder, setFolder] = useState<FolderFilter>('all');
