@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from bubble_api.routes import inputs, monitor, overview
+from bubble_api.routes import inputs, monitor, overview, questions
 from bubble_core.db import migrate
 from bubble_core.log import get_logger
 
@@ -26,4 +26,5 @@ def create_app() -> FastAPI:
     app.include_router(overview.router, prefix=API_PREFIX)
     app.include_router(inputs.router, prefix=API_PREFIX)
     app.include_router(monitor.router, prefix=API_PREFIX)
+    app.include_router(questions.router, prefix=API_PREFIX)
     return app

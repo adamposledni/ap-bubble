@@ -57,6 +57,10 @@ something, fix the knowledge files accordingly.
   or unambiguous context). When unsure, don't merge: add a line to `questions.md` in the
   knowledge base root, e.g. `- Is "Petr" in l0:123 the same as people/petr-novak.md?`.
 
+- An input starting with `Answer to the curator's question "..."` answers a question from
+  `questions.md`: apply the answer to the knowledge files. Never add an answered (or already
+  listed) question to `questions.md` again; the question is already removed from it.
+
 ## Finish
 
 Reply with a short summary: which files you created or changed, and anything you left out on

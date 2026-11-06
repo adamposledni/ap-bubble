@@ -70,9 +70,14 @@ def add_input(conn: sqlite3.Connection, text: str | None, files: list[NewFile]) 
     return get_input(conn, input_id)
 
 
-def list_inputs(conn: sqlite3.Connection, limit: int = 100) -> list[Input]:
-    """The newest inputs first."""
-    rows = conn.execute("SELECT * FROM l1_inputs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+def list_inputs(
+    conn: sqlite3.Connection, limit: int = 100, include_done: bool = True
+) -> list[Input]:
+    """The newest inputs first; done ones only if asked for."""
+    where = "" if include_done else "WHERE status != 'done'"
+    rows = conn.execute(
+        f"SELECT * FROM l1_inputs {where} ORDER BY id DESC LIMIT ?", (limit,)
+    ).fetchall()
     files = _files_of(conn, [row["id"] for row in rows])
     return [_to_input(row, files.get(row["id"], [])) for row in rows]
 

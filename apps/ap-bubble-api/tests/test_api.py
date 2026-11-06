@@ -1,9 +1,13 @@
 from collections.abc import Iterator
+from contextlib import closing
 
 import pytest
 from fastapi.testclient import TestClient
 
 from bubble_api.app import create_app
+from bubble_core.db import open_vault
+from bubble_core.input_queue import set_status
+from bubble_core.paths import knowledge_dir
 
 
 @pytest.fixture
@@ -64,3 +68,54 @@ def test_queued_input_is_deleted(client: TestClient) -> None:
     assert client.delete(f"/api/inputs/{created['id']}").status_code == 204
     assert client.get("/api/inputs").json() == []
     assert client.delete(f"/api/inputs/{created['id']}").status_code == 404
+
+
+def test_done_inputs_can_be_left_out(client: TestClient) -> None:
+    done = client.post("/api/inputs", data={"text": "old"}).json()
+    open_ = client.post("/api/inputs", data={"text": "new"}).json()
+    with closing(open_vault()) as conn:
+        set_status(conn, [done["id"]], "done")
+
+    listed = client.get("/api/inputs", params={"include_done": False}).json()
+
+    assert [item["id"] for item in listed] == [open_["id"]]
+    assert len(client.get("/api/inputs").json()) == 2
+
+
+def _write_questions(text: str) -> None:
+    (knowledge_dir() / "questions.md").write_text(text, encoding="utf-8")
+
+
+def test_questions_are_listed(client: TestClient) -> None:
+    assert client.get("/api/questions").json() == []
+    _write_questions("# Open questions\n\n- Which Petr?\n")
+
+    [question] = client.get("/api/questions").json()
+
+    assert question["text"] == "Which Petr?"
+
+
+def test_answering_a_question_queues_an_input_and_removes_it(client: TestClient) -> None:
+    _write_questions("# Open questions\n\n- Which Petr?\n")
+    [question] = client.get("/api/questions").json()
+
+    response = client.post(f"/api/questions/{question['id']}/answer", json={"text": "Novak"})
+
+    assert response.status_code == 201
+    assert response.json()["text"] == 'Answer to the curator\'s question "Which Petr?":\n\nNovak'
+    assert client.get("/api/questions").json() == []
+    assert len(client.get("/api/inputs").json()) == 1
+
+
+def test_dismissing_a_question_removes_it(client: TestClient) -> None:
+    _write_questions("- Which Petr?\n")
+    [question] = client.get("/api/questions").json()
+
+    assert client.post(f"/api/questions/{question['id']}/dismiss").status_code == 204
+    assert client.get("/api/questions").json() == []
+    assert client.get("/api/inputs").json() == []
+
+
+def test_unknown_question_is_not_found(client: TestClient) -> None:
+    assert client.post("/api/questions/nope/dismiss").status_code == 404
+    assert client.post("/api/questions/nope/answer", json={"text": "x"}).status_code == 404
