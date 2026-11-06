@@ -10,6 +10,7 @@ resolution-markers = [
 members = [
     "ap-bubble-api",
     "ap-bubble-core",
+    "ap-bubble-curator",
     "ap-bubble-ingest",
 ]
 
@@ -86,6 +87,17 @@ requires-dist = [
     { name = "python-dateutil", specifier = ">=4.0.0" },
     { name = "tzdata", specifier = ">=2026.6" },
 ]
+
+[[package]]
+name = "ap-bubble-curator"
+version = "0.1.0"
+source = { editable = "ap-bubble-curator" }
+dependencies = [
+    { name = "ap-bubble-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "ap-bubble-core", editable = "ap-bubble-core" }]
 
 [[package]]
 name = "ap-bubble-ingest"

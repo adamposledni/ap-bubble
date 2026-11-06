@@ -3,6 +3,7 @@
 members = [
     "ap-bubble-api",
     "ap-bubble-core",
+    "ap-bubble-curator",
     "ap-bubble-ingest",
 ]
 

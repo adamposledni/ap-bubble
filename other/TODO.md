@@ -72,6 +72,23 @@
       page metadata listed every run, page content (HTML) fetched only for new or changed pages.
 - [ ] Schedule ingest jobs (Windows Task Scheduler).
 
+## Curator
+
+- [ ] First real run (not run yet on purpose): try `.\tools\curator.ps1 run --dry-run`, read the batch
+      files, then a real run; tune `bubble_curator/prompts/curate.md` and the limits in
+      `bubble_curator/settings.py` on real output.
+- [ ] Backfill: L0 items older than the 30-day window are passed over; add a backfill command that
+      curates them in batches (the cursor has moved past them).
+- [ ] Deletions and cancellations in L0 are skipped as noise; curate them when they matter (e.g. a
+      cancelled meeting, a deleted contact).
+- [ ] Show `knowledge/questions.md` (unsure entity matches) on the dashboard (REQUIREMENTS §7).
+- [ ] Voice notes in L1: transcribe before curation.
+- [ ] No lock against two curator runs at once (fine while started by hand); add one before scheduling.
+- [ ] A failed batch makes the next run redo the whole page of changes; batches that succeeded may be
+      curated twice (the prompt merges facts, so mostly harmless).
+- [ ] Knowledge files are not versioned; put `%LOCALAPPDATA%\ap-bubble\knowledge` under git later.
+- [ ] Insights (birthdays, unanswered mail, conflicts) and L3 action proposals.
+
 ## Web UI
 
 - [ ] Run the web app without dev servers: build the UI and serve it from the API (one process),

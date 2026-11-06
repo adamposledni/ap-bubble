@@ -12,10 +12,15 @@ const SOURCE_NAMES: Record<string, string> = {
   teams_chats: 'Teams chats',
 };
 
+const JOB_NAMES: Record<string, string> = {
+  'curator.run': 'Curator',
+  'curator.dry_run': 'Curator (dry run)',
+};
+
 /** 'ingest.google_calendar' → 'Google Calendar'; unknown jobs keep their name. */
 export function jobLabel(jobName: string): string {
   const source = jobName.replace(/^ingest\./, '');
-  return SOURCE_NAMES[source] ?? jobName;
+  return JOB_NAMES[jobName] ?? SOURCE_NAMES[source] ?? jobName;
 }
 
 /** 'google:me@gmail.com' → 'me@gmail.com'. */

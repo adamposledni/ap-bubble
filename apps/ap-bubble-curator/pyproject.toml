@@ -1,0 +1,21 @@
+[project]
+name = "ap-bubble-curator"
+version = "0.1.0"
+description = "Curator job of ap-bubble: turns L1 inputs and L0 changes into L2 knowledge files via Claude Code."
+requires-python = ">=3.13"
+dependencies = [
+    "ap-bubble-core",
+]
+
+[project.scripts]
+ap-bubble-curator = "bubble_curator.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "bubble_curator"
+
+[tool.uv.sources]
+ap-bubble-core = { workspace = true }
