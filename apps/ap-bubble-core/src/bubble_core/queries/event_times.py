@@ -1,4 +1,7 @@
-"""Start and end of Google Calendar events as aware datetimes; all-day ones at local midnight."""
+"""Start and end of calendar events as aware datetimes; all-day ones at local midnight.
+
+span_of and moment_of read Google Calendar's start/end objects.
+"""
 
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
@@ -28,9 +31,14 @@ def span_of(event: dict[str, Any], tz: ZoneInfo) -> Span:
 def moment_of(when: dict[str, str], tz: ZoneInfo) -> datetime:
     """A start/end/originalStartTime value; timed ones in their own time zone when given."""
     if "date" in when:
-        return datetime.combine(date.fromisoformat(when["date"]), time(), tz)
+        return day_start(when["date"], tz)
     moment = datetime.fromisoformat(when["dateTime"])
     return moment.astimezone(ZoneInfo(when["timeZone"])) if "timeZone" in when else moment
+
+
+def day_start(day: str, tz: ZoneInfo) -> datetime:
+    """Midnight of a YYYY-MM-DD day in tz: where an all-day event starts or ends."""
+    return datetime.combine(date.fromisoformat(day), time(), tz)
 
 
 def as_text(moment: datetime, all_day: bool) -> str:
