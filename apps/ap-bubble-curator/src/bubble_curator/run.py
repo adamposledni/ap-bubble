@@ -18,6 +18,7 @@ from bubble_core.paths import curator_runs_dir
 from bubble_curator.batches import Batch, pack, write_batches
 from bubble_curator.changes import ChangeSet, read_changes
 from bubble_curator.claude import CurationFailed, curate_batch
+from bubble_curator.cleanup import remove_deleted_files
 from bubble_curator.cursor import load_position, save_position
 from bubble_curator.knowledge_index import write_index
 from bubble_curator.selection import is_curatable, window_start
@@ -81,6 +82,7 @@ def _curate(conn: sqlite3.Connection, batches: list[Batch], paths: list[Path], j
             set_status(conn, later, "queued")
             raise
         set_status(conn, batch.input_ids, "done")
+        remove_deleted_files()
         logger.info("Batch %s done (%d items): %s", path.name, batch.item_count, summary[:200])
     logger.info("Run %d curated %d batches", job.id, len(batches))
 
