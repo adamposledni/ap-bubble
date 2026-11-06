@@ -4,7 +4,7 @@
 #   .\tools\ingest.ps1 accounts                            # lists connected accounts
 #   .\tools\ingest.ps1 sync google_calendar                # ingests a source's changes into L0
 #                         (sources: google_calendar, google_tasks, google_contacts, gmail,
-#                          outlook_calendar, outlook_mail, planner, microsoft_todo)
+#                          outlook_calendar, outlook_mail, planner, microsoft_todo, teams_chats)
 $ErrorActionPreference = "Stop"
 $apps = Join-Path $PSScriptRoot "..\apps"
 uv --directory $apps run ap-bubble-ingest @args

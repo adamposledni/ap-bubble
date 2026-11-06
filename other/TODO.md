@@ -49,6 +49,20 @@
       ingested, so open tasks show no notes for Planner. Every run is a full load (no v1.0 delta).
 - [ ] To Do: checklist items and linked resources (e.g. the mail behind a Flagged email task) are not
       ingested.
+- [ ] Teams chats: load messages before 2026-01-01 (move `SYNC_FROM` in
+      `apps/ap-bubble-ingest/src/bubble_ingest/microsoft/chats/sync.py`, then delete the
+      `teams_chats` rows in `lm_sync_cursors`; older chats become containers too).
+- [ ] Teams chats: a chat is skipped while its last message is not newer than its cursor, so edits,
+      reactions and deletions of older messages arrive only with the next new message there; add a
+      periodic full pass (also flags messages purged by retention).
+- [ ] Teams chats: Microsoft's Teams API terms allow checking a resource for changes once a day;
+      each run lists `/me/chats` (~14 calls). Schedule `teams_chats` less often than other sources,
+      or move to change notifications (needs a webhook endpoint).
+- [ ] Teams chats: 6 active chats (type `unknownFutureValue` in v1.0, no members) answer 403 for
+      their messages; kept as containers without messages. Revisit when v1.0 names the type.
+- [ ] Teams chats: inline images (hostedContents) and file attachments are not downloaded; the body
+      keeps their Graph / SharePoint URLs. A chat gone from `/me/chats` is flagged deleted, its
+      messages are not.
 - [ ] Microsoft due dates are converted to this PC's time zone at ingest
       (`bubble_ingest/microsoft/due_dates.py`); a zone change does not recompute stored rows.
 - [ ] Check performance improvements to ingestion: multiple async/concurrent requests (per container,
