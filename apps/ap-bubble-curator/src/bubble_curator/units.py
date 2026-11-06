@@ -8,6 +8,7 @@ from bubble_curator.render_chats import ChatTitles, chat_units
 from bubble_curator.render_inputs import input_unit
 from bubble_curator.render_mail import mail_units
 from bubble_curator.render_records import record_unit
+from bubble_curator.render_series import is_occurrence, series_units
 from bubble_curator.unit import Unit
 
 
@@ -17,7 +18,9 @@ def build_units(
     units = [input_unit(i) for i in inputs]
     units += mail_units([i for i in items if i.kind == "mail"])
     units += chat_units([i for i in items if i.kind == "chat_message"], chat_titles)
-    units += [record_unit(i) for i in items if i.kind in ("event", "task", "contact")]
+    records = [i for i in items if i.kind in ("event", "task", "contact")]
+    units += series_units([i for i in records if is_occurrence(i)])
+    units += [record_unit(i) for i in records if not is_occurrence(i)]
     return sorted(units, key=lambda unit: unit.sort_key)
 
 

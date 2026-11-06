@@ -87,3 +87,43 @@ def test_inputs_come_first_then_items_by_time() -> None:
 
     assert units[0].input_ids == [7] and "Petr's birthday" in units[0].body
     assert units[1].heading.startswith("Event: Lunch")
+
+
+def _occurrence(item_id: int, kind: str = "occurrence", series: str = "s1") -> ChangedItem:
+    payload = {
+        "type": kind,
+        "seriesMasterId": series,
+        "location": {"displayName": "Room 1"},
+        "organizer": {"emailAddress": {"name": "Petr"}},
+    }
+    return _item(
+        item_id, "outlook_calendar", "event", payload, title="Standup",
+        starts_at=f"2026-11-0{item_id}T10:00:00+00:00",
+    )  # fmt: skip
+
+
+def test_occurrences_of_a_series_are_one_unit_with_count_and_range() -> None:
+    items = [_occurrence(3), _occurrence(1), _occurrence(2)]
+
+    [unit] = build_units([], items, {})
+
+    assert unit.heading == "Recurring event: Standup [l0:1] (work)"
+    assert unit.item_ids == [1, 2, 3]
+    assert unit.sort_key == "12026-11-01T10:00:00+00:00"
+    assert "Where: Room 1" in unit.body and "Organizer: Petr" in unit.body
+    assert "- Occurrences: 3, from " in unit.body
+
+
+def test_different_series_are_separate_units() -> None:
+    units = build_units([], [_occurrence(1), _occurrence(2, series="s2")], {})
+
+    assert [u.item_ids for u in units] == [[1], [2]]
+
+
+def test_exceptions_and_single_instances_stay_individual() -> None:
+    items = [_occurrence(1), _occurrence(2, "exception"), _occurrence(3, "singleInstance")]
+
+    units = build_units([], items, {})
+
+    assert [u.item_ids for u in units] == [[1], [2], [3]]
+    assert [u.heading.split(":")[0] for u in units] == ["Recurring event", "Event", "Event"]
