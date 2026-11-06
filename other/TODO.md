@@ -96,7 +96,6 @@
       curates them in batches (the cursor has moved past them).
 - [ ] Deletions and cancellations in L0 are skipped as noise; curate them when they matter (e.g. a
       cancelled meeting, a deleted contact).
-- [ ] Show `knowledge/questions.md` (unsure entity matches) on the dashboard (REQUIREMENTS §7).
 - [ ] Voice notes in L1: transcribe before curation.
 - [ ] No lock against two curator runs at once (fine while started by hand); add one before scheduling.
 - [ ] A failed batch makes the next run redo the whole page of changes; batches that succeeded may be
@@ -112,6 +111,19 @@
       started at logon (e.g. Task Scheduler) instead of `tools/web.ps1`.
 - [ ] Overview reads L0 directly; switch it to the curated layer (L2) once it exists.
 
-- [ ] Monitor follow-ups (the basic page exists): show the failed/stale banner on the Overview too,
-      detect runs stuck in `running` (a killed process- never finishes its row), add curator runs and
-      executed actions once they exist.
+- [ ] Monitor follow-ups: show the failed/stale banner on the Overview too; mark runs stuck in
+      `running` (a killed process never finishes its row; the "Running now" banner only hides them
+      after 12 h); add executed actions once they exist.
+- [ ] Monitor: show whether anything waits to be curated (queued L1 inputs, L0 changes past the
+      curator cursor) or everything is done.
+- [ ] Monitor: total cost of a curator run in the run drawer (sum of the batches); stop a running
+      curator run.
+- [ ] Input: revoke an input, i.e. remove what the curator learned from it from the knowledge files
+      (e.g. a curator instruction to drop facts citing `input:N`).
+- [ ] Input: the "All" view shows at most 100 inputs (`list_inputs`); add paging when it grows.
+- [ ] Questions: open-question count badge on the nav item.
+- [ ] Knowledge: graph view of links between knowledge files (backlinks are the navigation for now).
+- [ ] Knowledge: make `l0:N` / `input:N` citations clickable (open the source item or input).
+- [ ] Knowledge: entity page extras for people (birthday, recent mail, next meeting; REQUIREMENTS §8.1).
+- [ ] Knowledge: search scans the files on each request; move to an SQLite FTS index if it gets slow.
+- [ ] Web: the bundle is over 500 kB; code-split (e.g. lazy-load the Knowledge pages).
