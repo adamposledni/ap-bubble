@@ -1,5 +1,5 @@
 import { Grid, Group, Stack } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
+import { useState } from 'react';
 
 import { AgendaCard } from '../components/agenda/AgendaCard';
 import { KnowledgeSearch } from '../components/knowledge/KnowledgeSearch';
@@ -9,11 +9,8 @@ import type { ContextFilter } from '../lib/context';
 
 /** Knowledge search and context filter, then agenda and tasks. */
 export function OverviewPage() {
-  // Remembered per browser; falls back to 'personal' when nothing is stored.
-  const [filter, setFilter] = useLocalStorage<ContextFilter>({
-    key: 'overview-context-filter',
-    defaultValue: 'personal',
-  });
+  // Always opens on 'personal'; not remembered across visits.
+  const [filter, setFilter] = useState<ContextFilter>('personal');
 
   return (
     <Stack gap="md">
