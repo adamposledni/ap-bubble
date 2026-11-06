@@ -1,54 +1,20 @@
-import { AppShell, Burger, Group, NavLink, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import {
-  IconActivity,
-  IconBook,
-  IconHelpCircle,
-  IconInbox,
-  IconLayoutDashboard,
-} from '@tabler/icons-react';
+import { Anchor, AppShell, Group, Title } from '@mantine/core';
 import type { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link } from 'react-router';
 
-const PAGES = [
-  { path: '/', label: 'Overview', icon: IconLayoutDashboard },
-  { path: '/knowledge', label: 'Knowledge', icon: IconBook },
-  { path: '/input', label: 'Input', icon: IconInbox },
-  { path: '/questions', label: 'Questions', icon: IconHelpCircle },
-  { path: '/monitor', label: 'Monitor', icon: IconActivity },
-];
-
+/** Header with the app title (back to Overview); no side navigation. */
 export function Layout({ children }: { children: ReactNode }) {
-  const [opened, { toggle, close }] = useDisclosure();
-  const { pathname } = useLocation();
-
   return (
-    <AppShell
-      header={{ height: 56 }}
-      navbar={{ width: 220, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-      padding="md"
-    >
+    <AppShell header={{ height: 56 }} padding="md">
       <AppShell.Header>
         <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Title order={4} c="indigo">
-            Adam's bubble
-          </Title>
+          <Anchor component={Link} to="/" underline="never">
+            <Title order={4} c="indigo">
+              Adam's bubble
+            </Title>
+          </Anchor>
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar p="xs">
-        {PAGES.map(({ path, label, icon: Icon }) => (
-          <NavLink
-            key={path}
-            component={Link}
-            to={path}
-            label={label}
-            leftSection={<Icon size={18} stroke={1.5} />}
-            active={path === '/' ? pathname === path : pathname.startsWith(path)}
-            onClick={close}
-          />
-        ))}
-      </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>
   );

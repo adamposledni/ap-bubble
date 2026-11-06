@@ -1,7 +1,6 @@
 import { Group, Paper, Stack, Text, Title } from '@mantine/core';
 
 import type { KnowledgeRef } from '../../api/types';
-import { docPath } from '../../lib/knowledge';
 import { DocLink } from './DocLink';
 import { FolderBadge } from './FolderBadge';
 
@@ -18,7 +17,7 @@ export function Backlinks({ refs }: { refs: KnowledgeRef[] }) {
         )}
         {refs.map((ref) => (
           <Group key={`${ref.folder}/${ref.slug}`} gap="xs">
-            <DocLink to={docPath(ref.folder, ref.slug)}>{ref.name}</DocLink>
+            <DocLink doc={ref}>{ref.name}</DocLink>
             <FolderBadge folder={ref.folder} />
           </Group>
         ))}

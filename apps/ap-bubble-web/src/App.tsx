@@ -1,23 +1,19 @@
-import { Route, Routes } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
 
 import { Layout } from './components/layout/Layout';
 import { InputPage } from './pages/InputPage';
-import { KnowledgeDocPage } from './pages/KnowledgeDocPage';
-import { KnowledgePage } from './pages/KnowledgePage';
 import { MonitorPage } from './pages/MonitorPage';
 import { OverviewPage } from './pages/OverviewPage';
-import { QuestionsPage } from './pages/QuestionsPage';
 
 export function App() {
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<OverviewPage />} />
-        <Route path="/knowledge" element={<KnowledgePage />} />
-        <Route path="/knowledge/:folder/:slug" element={<KnowledgeDocPage />} />
         <Route path="/input" element={<InputPage />} />
-        <Route path="/questions" element={<QuestionsPage />} />
+        <Route path="/questions" element={<Navigate to="/input" replace />} />
         <Route path="/monitor" element={<MonitorPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   );

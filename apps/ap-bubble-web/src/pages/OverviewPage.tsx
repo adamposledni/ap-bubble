@@ -2,11 +2,13 @@ import { Grid, Group, Stack } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 
 import { AgendaCard } from '../components/agenda/AgendaCard';
+import { KnowledgeSearch } from '../components/knowledge/KnowledgeSearch';
 import { ContextFilterControl } from '../components/overview/ContextFilterControl';
+import { NavButtons } from '../components/overview/NavButtons';
 import { TasksCard } from '../components/tasks/TasksCard';
 import type { ContextFilter } from '../lib/context';
 
-/** Basic view straight over L0; it changes once the curated layer exists. */
+/** Knowledge search, links to Input and Monitor, then agenda and tasks. */
 export function OverviewPage() {
   // Remembered per browser; falls back to 'both' when storage is unavailable.
   const [filter, setFilter] = useLocalStorage<ContextFilter>({
@@ -16,8 +18,10 @@ export function OverviewPage() {
 
   return (
     <Stack gap="md">
-      <Group justify="flex-end">
+      <Group gap="sm">
+        <KnowledgeSearch />
         <ContextFilterControl value={filter} onChange={setFilter} />
+        <NavButtons />
       </Group>
       <Grid gutter="md">
         <Grid.Col span={{ base: 12, md: 7 }}>

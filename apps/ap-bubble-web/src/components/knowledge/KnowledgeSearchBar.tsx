@@ -25,7 +25,7 @@ export function KnowledgeSearchBar({ input, onInput, folder, onFolder }: Props) 
         rightSection={input && <CloseButton aria-label="Clear" onClick={() => onInput('')} />}
         value={input}
         onChange={(event) => onInput(event.currentTarget.value)}
-        autoFocus
+        data-autofocus
       />
       <SegmentedControl
         data={FOLDER_OPTIONS}

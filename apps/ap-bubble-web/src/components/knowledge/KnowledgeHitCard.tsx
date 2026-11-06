@@ -1,19 +1,17 @@
 import { Group, Paper, Stack, Text, UnstyledButton } from '@mantine/core';
-import { Link, useLocation } from 'react-router';
 
 import type { KnowledgeHit } from '../../api/types';
 import { formatDate } from '../../lib/dates';
-import { docPath, type KnowledgeNavState } from '../../lib/knowledge';
 import { FolderBadge } from './FolderBadge';
+import { useOpenDoc } from './KnowledgeNav';
 import { SnippetText } from './SnippetText';
 import { TagList } from './TagList';
 
 export function KnowledgeHitCard({ hit }: { hit: KnowledgeHit }) {
-  const state: KnowledgeNavState = { search: useLocation().search };
-  const to = docPath(hit.folder, hit.slug);
+  const openDoc = useOpenDoc();
 
   return (
-    <UnstyledButton component={Link} to={to} state={state} display="block">
+    <UnstyledButton display="block" w="100%" onClick={() => openDoc(hit)}>
       <Paper withBorder p="sm">
         <Stack gap={6}>
           <Group justify="space-between" wrap="nowrap" align="flex-start">

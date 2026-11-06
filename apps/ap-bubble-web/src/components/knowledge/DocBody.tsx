@@ -3,14 +3,14 @@ import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 
 import type { KnowledgeFolder } from '../../api/types';
-import { knowledgeLinkPath } from '../../lib/knowledge';
+import { knowledgeLinkRef } from '../../lib/knowledge';
 import { CITATION_CLASS, rehypeCitations } from '../../lib/rehypeCitations';
 import { Citation } from './Citation';
 import { DocLink } from './DocLink';
 
 const EXTERNAL = /^(https?:|mailto:|tel:)/i;
 
-/** The markdown body of a knowledge file; links to other files open their pages, citations are dimmed. */
+/** The markdown body of a knowledge file; links to other files open them, citations are dimmed. */
 export function DocBody({ folder, body }: { folder: KnowledgeFolder; body: string }) {
   return (
     <Typography>
@@ -38,10 +38,10 @@ interface BodyLinkProps {
   children: ReactNode;
 }
 
-/** Knowledge files in the app, web links in a new tab, anything else as plain text. */
+/** Knowledge files in the dialog, web links in a new tab, anything else as plain text. */
 function BodyLink({ folder, href, children }: BodyLinkProps) {
-  const path = knowledgeLinkPath(folder, href);
-  if (path) return <DocLink to={path}>{children}</DocLink>;
+  const doc = knowledgeLinkRef(folder, href);
+  if (doc) return <DocLink doc={doc}>{children}</DocLink>;
   if (EXTERNAL.test(href)) {
     return (
       <Anchor href={href} target="_blank" rel="noreferrer">

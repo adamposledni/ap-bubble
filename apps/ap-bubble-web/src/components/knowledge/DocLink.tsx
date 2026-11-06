@@ -1,15 +1,14 @@
 import { Anchor } from '@mantine/core';
 import type { ReactNode } from 'react';
-import { Link } from 'react-router';
 
-import { useOriginSearch } from '../../hooks/useOriginSearch';
-import type { KnowledgeNavState } from '../../lib/knowledge';
+import type { DocRef } from '../../lib/knowledge';
+import { useOpenDoc } from './KnowledgeNav';
 
-/** In-app link from one knowledge file to another, keeping the search to go back to. */
-export function DocLink({ to, children }: { to: string; children: ReactNode }) {
-  const state: KnowledgeNavState = { search: useOriginSearch() };
+/** Link from one knowledge file to another, opened in the same dialog. */
+export function DocLink({ doc, children }: { doc: DocRef; children: ReactNode }) {
+  const openDoc = useOpenDoc();
   return (
-    <Anchor component={Link} to={to} state={state}>
+    <Anchor component="button" type="button" fz="inherit" onClick={() => openDoc(doc)}>
       {children}
     </Anchor>
   );
