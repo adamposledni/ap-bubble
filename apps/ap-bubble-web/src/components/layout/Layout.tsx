@@ -23,7 +23,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <Title order={4} c="indigo">
-            ap-bubble
+            Adam's bubble
           </Title>
         </Group>
       </AppShell.Header>
