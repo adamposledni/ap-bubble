@@ -26,6 +26,16 @@ def inbox_dir() -> Path:
     return _ensure(data_dir() / "inbox")
 
 
+def knowledge_dir() -> Path:
+    """L2 knowledge files (markdown), kept up to date by the curator."""
+    return _ensure(data_dir() / "knowledge")
+
+
+def curator_runs_dir() -> Path:
+    """Per curator run: the batch files given to Claude and its output."""
+    return _ensure(data_dir() / "curator" / "runs")
+
+
 def _local_app_data() -> Path:
     return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
 
