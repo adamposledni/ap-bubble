@@ -148,3 +148,31 @@ export interface KnowledgeDoc {
   body: string; // markdown
   backlinks: KnowledgeRef[];
 }
+
+export interface ItemAccount {
+  email: string;
+  context: Context;
+}
+
+/** An L0 item (l0:N) as a source delivered it. */
+export interface ItemSummary {
+  id: number;
+  source: string; // e.g. 'outlook_mail'
+  kind: string; // 'event', 'mail', 'task', 'contact', ...
+  title: string | null;
+  startsAt: string | null; // UTC timestamp, or YYYY-MM-DD for all-day items
+  endsAt: string | null;
+  deleted: boolean;
+  account: ItemAccount;
+  changedAt: string;
+}
+
+export interface ItemDetail extends ItemSummary {
+  text: string | null; // readable text of the payload, if it has any
+  payload: Record<string, unknown>;
+}
+
+export interface ItemRange {
+  items: ItemSummary[];
+  truncated: boolean; // the range holds more ids than one read returns
+}

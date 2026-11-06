@@ -54,6 +54,11 @@ export function formatDate(day: string): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) ? dateFormat.format(parseDay(day)) : day;
 }
 
+/** A timestamp as date and time, a plain YYYY-MM-DD date as a date. */
+export function formatDateOrTime(value: string): string {
+  return value.length <= 10 ? formatDate(value) : formatDateTime(value);
+}
+
 export function formatTime(timestamp: string): string {
   return timeFormat.format(new Date(timestamp));
 }

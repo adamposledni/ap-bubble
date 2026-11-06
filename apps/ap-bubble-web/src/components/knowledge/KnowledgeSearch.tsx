@@ -1,22 +1,22 @@
 import { Kbd, TextInput } from '@mantine/core';
 import { useDisclosure, useHotkeys } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
-import { useState } from 'react';
 
 import { useKnowledgeSearch } from '../../hooks/useKnowledgeSearch';
-import type { DocRef } from '../../lib/knowledge';
+import { useNavStack } from '../../hooks/useNavStack';
 import { KnowledgeDialog } from './KnowledgeDialog';
+import type { KnowledgeTarget } from './KnowledgeNav';
 
 /** Search bar that opens the knowledge dialog (also Ctrl+K); closing it clears the search text. */
 export function KnowledgeSearch() {
   const [opened, { open, close }] = useDisclosure(false);
-  const [doc, setDoc] = useState<DocRef | null>(null);
+  const nav = useNavStack<KnowledgeTarget>();
   const search = useKnowledgeSearch();
   useHotkeys([['mod+K', open]]);
 
   const onClose = () => {
     close();
-    setDoc(null);
+    nav.reset();
     search.setInput('');
   };
 
@@ -35,7 +35,7 @@ export function KnowledgeSearch() {
         onKeyDown={(event) => event.key === 'Enter' && open()}
         aria-label="Search knowledge"
       />
-      <KnowledgeDialog opened={opened} onClose={onClose} search={search} doc={doc} onDoc={setDoc} />
+      <KnowledgeDialog opened={opened} onClose={onClose} search={search} nav={nav} />
     </>
   );
 }

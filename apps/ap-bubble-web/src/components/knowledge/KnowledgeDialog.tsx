@@ -2,10 +2,11 @@ import { Button, Modal, Stack, Text } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 
 import type { useKnowledgeSearch } from '../../hooks/useKnowledgeSearch';
-import type { DocRef } from '../../lib/knowledge';
+import type { NavStack } from '../../hooks/useNavStack';
 import { Loadable } from '../common/Loadable';
+import { SourceView } from '../sources/SourceView';
 import { KnowledgeDocView } from './KnowledgeDocView';
-import { KnowledgeNavContext } from './KnowledgeNav';
+import { KnowledgeNavContext, type KnowledgeTarget } from './KnowledgeNav';
 import { KnowledgeResults } from './KnowledgeResults';
 import { KnowledgeSearchBar } from './KnowledgeSearchBar';
 
@@ -13,24 +14,33 @@ interface Props {
   opened: boolean;
   onClose: () => void;
   search: ReturnType<typeof useKnowledgeSearch>;
-  doc: DocRef | null;
-  onDoc: (doc: DocRef | null) => void;
+  nav: NavStack<KnowledgeTarget>;
 }
 
-/** Knowledge search with its results; a chosen file replaces them until "Back to results". */
-export function KnowledgeDialog({ opened, onClose, search, doc, onDoc }: Props) {
+/** Knowledge search with its results; an opened file or source replaces them until "Back". */
+export function KnowledgeDialog({ opened, onClose, search, nav }: Props) {
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       size="xl"
-      title={doc ? <BackToResults onClick={() => onDoc(null)} /> : <Text fw={600}>Knowledge</Text>}
+      title={
+        nav.current ? <BackButton depth={nav.depth} onClick={nav.back} /> : <Text fw={600}>Knowledge</Text>
+      }
     >
-      <KnowledgeNavContext.Provider value={onDoc}>
-        {doc ? <KnowledgeDocView doc={doc} /> : <SearchView search={search} />}
+      <KnowledgeNavContext.Provider value={nav.open}>
+        {nav.current ? (
+          <TargetView key={nav.depth} target={nav.current} />
+        ) : (
+          <SearchView search={search} />
+        )}
       </KnowledgeNavContext.Provider>
     </Modal>
   );
+}
+
+function TargetView({ target }: { target: KnowledgeTarget }) {
+  return target.type === 'doc' ? <KnowledgeDocView doc={target.doc} /> : <SourceView source={target.source} />;
 }
 
 function SearchView({ search }: { search: Props['search'] }) {
@@ -45,7 +55,7 @@ function SearchView({ search }: { search: Props['search'] }) {
   );
 }
 
-function BackToResults({ onClick }: { onClick: () => void }) {
+function BackButton({ depth, onClick }: { depth: number; onClick: () => void }) {
   return (
     <Button
       variant="subtle"
@@ -53,7 +63,7 @@ function BackToResults({ onClick }: { onClick: () => void }) {
       leftSection={<IconArrowLeft size={16} stroke={1.5} />}
       onClick={onClick}
     >
-      Back to results
+      {depth > 1 ? 'Back' : 'Back to results'}
     </Button>
   );
 }

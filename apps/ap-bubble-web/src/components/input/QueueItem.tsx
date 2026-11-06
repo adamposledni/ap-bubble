@@ -1,10 +1,9 @@
-import { Anchor, Group, Paper, Spoiler, Stack, Text } from '@mantine/core';
-import { IconPaperclip } from '@tabler/icons-react';
+import { Group, Paper, Spoiler, Stack, Text } from '@mantine/core';
 
 import type { InputItem } from '../../api/types';
 import { formatDateTime } from '../../lib/dates';
-import { formatSize } from '../../lib/format';
 import { DeleteInputButton } from './DeleteInputButton';
+import { InputFileLink } from './InputFileLink';
 import { StatusBadge } from './StatusBadge';
 
 export function QueueItem({ item, onDeleted }: { item: InputItem; onDeleted: () => void }) {
@@ -26,15 +25,7 @@ export function QueueItem({ item, onDeleted }: { item: InputItem; onDeleted: () 
             </Spoiler>
           )}
           {item.files.map((file) => (
-            <Group key={file.id} gap={6} wrap="nowrap">
-              <IconPaperclip size={14} stroke={1.5} />
-              <Anchor href={`/api/inputs/files/${file.id}`} size="sm" truncate>
-                {file.name}
-              </Anchor>
-              <Text size="xs" c="dimmed">
-                {formatSize(file.sizeBytes)}
-              </Text>
-            </Group>
+            <InputFileLink key={file.id} file={file} />
           ))}
           {item.error && (
             <Text size="xs" c="red">
