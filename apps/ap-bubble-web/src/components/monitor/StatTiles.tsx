@@ -6,7 +6,7 @@ export function StatTiles({ monitor }: { monitor: Monitor }) {
   const failed = monitor.jobs.filter((job) => job.lastStatus === 'failed').length;
   const stale = monitor.jobs.filter((job) => job.stale).length;
   const tiles = [
-    { label: 'Sources', value: monitor.jobs.length, color: undefined },
+    { label: 'Jobs', value: monitor.jobs.length, color: undefined },
     { label: 'Failed', value: failed, color: failed > 0 ? 'red' : undefined },
     { label: 'Stale (24 h)', value: stale, color: stale > 0 ? 'yellow.8' : undefined },
     { label: 'Inputs waiting', value: monitor.queue.queued ?? 0, color: undefined },

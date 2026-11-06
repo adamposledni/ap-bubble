@@ -4,6 +4,7 @@ from collections.abc import Callable
 import pytest
 
 from bubble_core.accounts import Account
+from bubble_core.clock import utc_now
 from bubble_core.inputs import add_input
 from bubble_core.job_log import job_run
 from bubble_core.queries.monitor import monitor
@@ -67,3 +68,34 @@ def test_queue_is_counted_per_status(conn: sqlite3.Connection) -> None:
     add_input(conn, "two", [])
 
     assert monitor(conn).queue == {"queued": 2}
+
+
+def test_dry_run_is_a_curator_run_and_no_job(conn: sqlite3.Connection) -> None:
+    with job_run(conn, "curator.dry_run"):
+        pass
+
+    result = monitor(conn)
+
+    assert result.jobs == []
+    [run] = result.runs
+    assert (run.job_name, run.dry_run) == ("curator.run", True)
+
+
+def test_recent_runs_cover_the_last_seven_days(conn: sqlite3.Connection, account: Account) -> None:
+    _run(conn, "ingest.gmail", account.key)
+    conn.execute("UPDATE lm_job_runs SET started_at = '2020-01-01T00:00:00+00:00'")
+    _run(conn, "ingest.google_tasks", account.key)
+
+    assert [r.job_name for r in monitor(conn).runs] == ["ingest.google_tasks"]
+
+
+def test_running_job_is_listed_without_batch_progress_for_ingest(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        "INSERT INTO lm_job_runs (job_name, scope, status, started_at) "
+        "VALUES ('ingest.gmail', 'google:me@gmail.com', 'running', ?)",
+        (utc_now(),),
+    )
+
+    [running] = monitor(conn).running
+
+    assert (running.run.job_name, running.batch_current) == ("ingest.gmail", None)

@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from bubble_api.app import create_app
 from bubble_core.db import open_vault
 from bubble_core.input_queue import set_status
-from bubble_core.paths import knowledge_dir
+from bubble_core.paths import curator_runs_dir, knowledge_dir
 
 
 @pytest.fixture
@@ -27,7 +27,26 @@ def test_agenda_and_tasks_of_an_empty_vault(client: TestClient) -> None:
 def test_monitor_of_an_empty_vault(client: TestClient) -> None:
     response = client.get("/api/monitor")
 
-    assert (response.status_code, response.json()) == (200, {"jobs": [], "runs": [], "queue": {}})
+    assert (response.status_code, response.json()) == (
+        200,
+        {"jobs": [], "runs": [], "running": [], "queue": {}},
+    )
+
+
+def test_unknown_run_and_unsafe_batch_names_are_not_found(client: TestClient) -> None:
+    assert client.get("/api/monitor/runs/999").status_code == 404
+    assert client.get("/api/monitor/runs/1/batches/knowledge-index.md").status_code == 404
+    assert client.get("/api/monitor/runs/1/batches/batch-01.md").status_code == 404
+
+
+def test_batch_file_is_served_as_text(client: TestClient) -> None:
+    batch = curator_runs_dir() / "1" / "batch-01.md"
+    batch.parent.mkdir(parents=True)
+    batch.write_text("# batch", encoding="utf-8")
+
+    response = client.get("/api/monitor/runs/1/batches/batch-01.md")
+
+    assert (response.status_code, response.text) == (200, "# batch")
 
 
 def test_monitor_counts_the_queue(client: TestClient) -> None:
