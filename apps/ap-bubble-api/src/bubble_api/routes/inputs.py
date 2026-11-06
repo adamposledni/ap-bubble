@@ -1,4 +1,4 @@
-"""L1 input: queue text and/or files, list the queue, delete queued items, download files."""
+"""L1 input: queue text and/or files, list the queue, read or delete one, download files."""
 
 from typing import Annotated
 
@@ -14,6 +14,7 @@ from bubble_core.inputs import (
     add_input,
     delete_input,
     get_file,
+    get_input,
     list_inputs,
 )
 
@@ -39,6 +40,14 @@ def post_input(
         return InputOut.model_validate(add_input(conn, text, new_files))
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
+
+
+@router.get("/{input_id}")
+def get_one_input(conn: Conn, input_id: int) -> InputOut:
+    try:
+        return InputOut.model_validate(get_input(conn, input_id))
+    except InputNotFound as error:
+        raise HTTPException(404, str(error)) from error
 
 
 @router.delete("/{input_id}", status_code=204)

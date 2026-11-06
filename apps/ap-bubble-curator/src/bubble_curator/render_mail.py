@@ -3,7 +3,7 @@
 from collections import defaultdict
 from typing import Any
 
-from bubble_curator import gmail_text
+from bubble_core import gmail_text
 from bubble_curator.changes import ChangedItem
 from bubble_curator.unit import Unit, clip, local_time, ref
 

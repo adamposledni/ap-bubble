@@ -1,8 +1,10 @@
-// Rehype plugin: wraps citations in markdown text into <span class="citation"> elements.
+// Rehype plugin: wraps citations in markdown text into <span class="citation"> elements,
+// each source reference inside them into a <span class="citation-ref">.
 
-import { splitCitations } from './citations';
+import { splitCitation, splitCitations } from './citations';
 
 export const CITATION_CLASS = 'citation';
+export const CITATION_REF_CLASS = 'citation-ref';
 
 interface HastText {
   type: 'text';
@@ -19,18 +21,29 @@ type HastNode = HastText | HastParent;
 
 const SKIPPED_TAGS = new Set(['code', 'pre']);
 
-function citationElement(value: string): HastParent {
+function span(className: string, children: HastNode[]): HastParent {
   return {
     type: 'element',
     tagName: 'span',
-    properties: { className: [CITATION_CLASS] },
-    children: [{ type: 'text', value }],
+    properties: { className: [className] },
+    children,
   } as HastParent;
+}
+
+function textNode(value: string): HastText {
+  return { type: 'text', value };
+}
+
+function citationElement(value: string): HastParent {
+  const children = splitCitation(value).map((part) =>
+    part.source ? span(CITATION_REF_CLASS, [textNode(part.text)]) : textNode(part.text),
+  );
+  return span(CITATION_CLASS, children);
 }
 
 function splitText(node: HastText): HastNode[] {
   return splitCitations(node.value).map((piece) =>
-    piece.citation ? citationElement(piece.text) : { type: 'text', value: piece.text },
+    piece.citation ? citationElement(piece.text) : textNode(piece.text),
   );
 }
 

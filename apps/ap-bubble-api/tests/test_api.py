@@ -5,8 +5,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from bubble_api.app import create_app
+from bubble_core.accounts import upsert_account
 from bubble_core.db import open_vault
 from bubble_core.input_queue import set_status
+from bubble_core.items import Item, save_item
+from bubble_core.job_log import job_run
 from bubble_core.paths import curator_runs_dir, knowledge_dir
 
 
@@ -99,6 +102,50 @@ def test_done_inputs_can_be_left_out(client: TestClient) -> None:
 
     assert [item["id"] for item in listed] == [open_["id"]]
     assert len(client.get("/api/inputs").json()) == 2
+
+
+def test_one_input_is_read(client: TestClient) -> None:
+    created = client.post("/api/inputs", data={"text": "note"}).json()
+
+    assert client.get(f"/api/inputs/{created['id']}").json() == created
+    assert client.get("/api/inputs/999").status_code == 404
+
+
+def _store_mails(count: int) -> list[int]:
+    """Saves count Outlook mails of a work account; returns their L0 ids."""
+    with closing(open_vault()) as conn:
+        account = upsert_account(conn, "microsoft", "me@work.cz", "work")
+        with job_run(conn, "test.ingest") as run:
+            for n in range(count):
+                payload = {"body": {"contentType": "html", "content": f"<p>Hello {n}</p>"}}
+                item = Item(
+                    "outlook_mail", "", f"m{n}", "mail", f"Mail {n}", None, None, False, payload
+                )
+                save_item(conn, account.id, item, run.id)
+        conn.commit()
+        return [row["id"] for row in conn.execute("SELECT id FROM l0_items ORDER BY id")]
+
+
+def test_one_item_is_read_with_its_text(client: TestClient) -> None:
+    [item_id] = _store_mails(1)
+
+    item = client.get(f"/api/items/{item_id}").json()
+
+    assert (item["title"], item["kind"], item["text"]) == ("Mail 0", "mail", "Hello 0")
+    assert item["account"] == {"email": "me@work.cz", "context": "work"}
+    assert item["payload"]["body"]["contentType"] == "html"
+    assert client.get("/api/items/999").status_code == 404
+
+
+def test_item_range_is_capped(client: TestClient) -> None:
+    ids = _store_mails(3)
+
+    whole = client.get("/api/items", params={"from": ids[0], "to": ids[-1]}).json()
+    capped = client.get("/api/items", params={"from": ids[0], "to": ids[0] + 100}).json()
+
+    assert ([i["id"] for i in whole["items"]], whole["truncated"]) == (ids, False)
+    assert capped["truncated"] is True
+    assert client.get("/api/items", params={"from": 5, "to": 1}).status_code == 422
 
 
 def _write_questions(text: str) -> None:
