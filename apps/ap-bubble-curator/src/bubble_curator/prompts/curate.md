@@ -36,6 +36,14 @@ Vázler" for Zbyněk Vázler, "Povrlech" for Povrly). Write the correct spelling
 existing knowledge files and context. When you cannot tell, keep the most likely spelling and
 add a line to `questions.md`.
 
+Knowledge files hold only the corrected end state. Never record a transcription error, what Adam
+said or confirmed, or how a fact was corrected ("answer transcribed as ...", "confirmed as ...").
+The Timeline is for real-world changes only (moved, changed jobs), not for fixes to earlier notes.
+
+Do not describe where a fact came from in the text ("derived from the birth number in OneNote",
+"according to the mail"): the citation already does that. Leave out inferred, approximate or
+unimportant details too (e.g. "aged about 15–16"). Write only what is stated and matters.
+
 Contacts: create or update a `people/` file for every contact in the batch, even with only a
 name and phone; the phone and email let later mail and chats be matched to the person.
 
@@ -61,11 +69,26 @@ name and phone; the phone and email let later mail and chats be matched to the p
   `## Timeline` (dated bullets).
 - Every fact cites where it came from: `- Prefers calls before 9:00 (l0:12345, 2026-10-02)` or
   `(input:7)`. Keep the citation of the source you actually read.
-- Write in English; keep names, places and quotes in their original language and spelling.
-- When a name is corrected, rename the file to match it and update every link to it (Grep for
-  the old file name).
-- Merge, don't duplicate. Keep files short; replace outdated facts (mention the change in the
-  Timeline) rather than piling up contradictions.
+- Write all prose in Czech (summaries, facts, timeline, job titles, common nouns), whatever the
+  language of the source. Do not mix in English words or glosses in parentheses. Structure and metadata
+  stay in English: the section headings (`## Summary`, `## Facts`, `## Timeline`), front matter
+  keys, tags and file names. The `name:` title is user content, so it is Czech.
+  Names of people, places, companies and products keep their original spelling.
+  Write `questions.md` in Czech too.
+- You cannot delete or rename files. To delete one, overwrite it with only this front matter;
+  it is removed after the batch. Never leave a stub or redirect note in it.
+
+  ```
+  ---
+  deleted: true
+  ---
+  ```
+
+- When a name is corrected, rename the file to match it: write the new file, mark the old one
+  deleted and update every link to it (Grep for the old file name).
+- Merge, don't duplicate: when two files are the same person, place or topic, move everything into
+  one, mark the other deleted and update its links. Keep files short; replace outdated facts
+  (mention the change in the Timeline) rather than piling up contradictions.
 - Link related files with relative markdown links, e.g. `[Petr Novák](../people/petr-novak.md)`.
 - Only link a mention to an existing person when it is clearly the same one (same email, phone,
   or unambiguous context). When unsure, don't merge: add a line to `questions.md` in the
