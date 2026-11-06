@@ -114,7 +114,7 @@
 - [ ] Monitor follow-ups: show the failed/stale banner on the Overview too; mark runs stuck in
       `running` (a killed process never finishes its row; the "Running now" banner only hides them
       after 12 h); add executed actions once they exist.
-- [ ] Monitor: show whether anything waits to be curated (queued L1 inputs, L0 changes past the
+- [x] Monitor: show whether anything waits to be curated (queued L1 inputs, L0 changes past the
       curator cursor) or everything is done.
 - [ ] Monitor: total cost of a curator run in the run drawer (sum of the batches); stop a running
       curator run.

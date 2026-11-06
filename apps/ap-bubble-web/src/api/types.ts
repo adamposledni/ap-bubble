@@ -78,6 +78,7 @@ export interface Monitor {
   runs: JobRun[]; // the last 7 days
   running: RunningJob[];
   queue: Partial<Record<InputStatus, number>>;
+  changesWaiting: number; // L0 rows past the curator cursor
 }
 
 export interface Question {

@@ -10,7 +10,6 @@ export function StatTiles({ monitor }: { monitor: Monitor }) {
     { label: 'Jobs', value: monitor.jobs.length, color: undefined },
     { label: 'Failed', value: failed, color: failed > 0 ? 'red' : undefined },
     { label: 'Stale', value: stale, color: stale > 0 ? 'yellow.8' : undefined },
-    { label: 'Inputs waiting', value: monitor.queue.queued ?? 0, color: undefined },
   ];
 
   return (

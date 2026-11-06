@@ -99,3 +99,20 @@ def test_running_job_is_listed_without_batch_progress_for_ingest(conn: sqlite3.C
     [running] = monitor(conn).running
 
     assert (running.run.job_name, running.batch_current) == ("ingest.gmail", None)
+
+
+def test_l0_changes_past_the_curator_cursor_wait(
+    conn: sqlite3.Connection, store_item: Callable[..., None]
+) -> None:
+    store_item("google_tasks", "task", "list", "t1", {"title": "a"})
+    store_item("google_tasks", "task", "list", "t2", {"title": "b"})
+    assert monitor(conn).changes_waiting == 2
+
+    first = conn.execute("SELECT changed_run_id, id FROM l0_items ORDER BY id").fetchone()
+    conn.execute(
+        "INSERT INTO lm_curator_cursor (id, changed_run_id, item_id, updated_at) "
+        "VALUES (1, ?, ?, ?)",
+        (first["changed_run_id"], first["id"], utc_now()),
+    )
+
+    assert monitor(conn).changes_waiting == 1

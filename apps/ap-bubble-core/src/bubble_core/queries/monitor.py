@@ -1,4 +1,4 @@
-"""Monitoring: the state of every job per scope, runs, L0 item counts, the L1 queue (LM)."""
+"""Monitoring: job states, runs, L0 item counts, the L1 queue, uncurated L0 changes (LM)."""
 
 import sqlite3
 from dataclasses import dataclass
@@ -33,13 +33,23 @@ class Monitor:
     runs: list[JobRun]  # last 7 days, dry runs included
     running: list[RunningJob]
     queue: dict[str, int]  # L1 inputs per status
+    changes_waiting: int  # L0 rows past the curator cursor
 
 
 def monitor(conn: sqlite3.Connection) -> Monitor:
     result = Monitor(
-        _job_statuses(conn), recent_runs(conn), running_jobs(conn), _queue_counts(conn)
+        _job_statuses(conn),
+        recent_runs(conn),
+        running_jobs(conn),
+        _queue_counts(conn),
+        _changes_waiting(conn),
     )
-    logger.debug("Monitor: %d jobs, %d runs", len(result.jobs), len(result.runs))
+    logger.debug(
+        "Monitor: %d jobs, %d runs, %d L0 changes waiting",
+        len(result.jobs),
+        len(result.runs),
+        result.changes_waiting,
+    )
     return result
 
 
@@ -82,6 +92,15 @@ def _item_counts(conn: sqlite3.Connection) -> dict[tuple[str, str], int]:
 def _queue_counts(conn: sqlite3.Connection) -> dict[str, int]:
     rows = conn.execute("SELECT status, COUNT(*) AS n FROM l1_inputs GROUP BY status").fetchall()
     return {row["status"]: row["n"] for row in rows}
+
+
+def _changes_waiting(conn: sqlite3.Connection) -> int:
+    """L0 rows the curator has not looked at yet, in its (changed_run_id, id) order."""
+    row = conn.execute(
+        "SELECT COUNT(*) AS n FROM l0_items i LEFT JOIN lm_curator_cursor c ON c.id = 1 "
+        "WHERE (i.changed_run_id, i.id) > (COALESCE(c.changed_run_id, 0), COALESCE(c.item_id, 0))"
+    ).fetchone()
+    return row["n"]
 
 
 def _items_of(job_name: str, scope: str | None, counts: dict[tuple[str, str], int]) -> int | None:

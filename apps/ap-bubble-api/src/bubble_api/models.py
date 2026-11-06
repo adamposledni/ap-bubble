@@ -69,6 +69,7 @@ class MonitorOut(ApiModel):
     runs: list[JobRunOut]
     running: list[RunningJobOut]
     queue: dict[str, int]
+    changes_waiting: int
 
 
 class BatchOut(ApiModel):

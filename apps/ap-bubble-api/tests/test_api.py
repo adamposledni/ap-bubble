@@ -29,7 +29,7 @@ def test_monitor_of_an_empty_vault(client: TestClient) -> None:
 
     assert (response.status_code, response.json()) == (
         200,
-        {"jobs": [], "runs": [], "running": [], "queue": {}},
+        {"jobs": [], "runs": [], "running": [], "queue": {}, "changesWaiting": 0},
     )
 
 
