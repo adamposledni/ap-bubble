@@ -1,5 +1,7 @@
 """Response models: the core's read models as camelCase JSON."""
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
@@ -147,3 +149,30 @@ class KnowledgeDocOut(ApiModel):
     meta: KnowledgeMetaOut
     body: str
     backlinks: list[KnowledgeRefOut]
+
+
+class ItemAccountOut(ApiModel):
+    email: str
+    context: Context
+
+
+class ItemSummaryOut(ApiModel):
+    id: int
+    source: str
+    kind: str
+    title: str | None
+    starts_at: str | None
+    ends_at: str | None
+    deleted: bool
+    account: ItemAccountOut
+    changed_at: str
+
+
+class ItemDetailOut(ItemSummaryOut):
+    text: str | None
+    payload: dict[str, Any]
+
+
+class ItemRangeOut(ApiModel):
+    items: list[ItemSummaryOut]
+    truncated: bool
