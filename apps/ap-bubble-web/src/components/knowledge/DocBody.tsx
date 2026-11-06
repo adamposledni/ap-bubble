@@ -4,16 +4,21 @@ import Markdown from 'react-markdown';
 
 import type { KnowledgeFolder } from '../../api/types';
 import { knowledgeLinkPath } from '../../lib/knowledge';
+import { CITATION_CLASS, rehypeCitations } from '../../lib/rehypeCitations';
+import { Citation } from './Citation';
 import { DocLink } from './DocLink';
 
 const EXTERNAL = /^(https?:|mailto:|tel:)/i;
 
-/** The markdown body of a knowledge file; links to other files open their pages. */
+/** The markdown body of a knowledge file; links to other files open their pages, citations are dimmed. */
 export function DocBody({ folder, body }: { folder: KnowledgeFolder; body: string }) {
   return (
     <Typography>
       <Markdown
+        rehypePlugins={[rehypeCitations]}
         components={{
+          span: ({ className, children }) =>
+            className === CITATION_CLASS ? <Citation>{children}</Citation> : <span>{children}</span>,
           a: ({ href, children }) => (
             <BodyLink folder={folder} href={href ?? ''}>
               {children}
