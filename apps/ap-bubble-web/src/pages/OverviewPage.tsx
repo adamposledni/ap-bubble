@@ -9,10 +9,10 @@ import type { ContextFilter } from '../lib/context';
 
 /** Knowledge search and context filter, then agenda and tasks. */
 export function OverviewPage() {
-  // Remembered per browser; falls back to 'both' when storage is unavailable.
+  // Remembered per browser; falls back to 'personal' when nothing is stored.
   const [filter, setFilter] = useLocalStorage<ContextFilter>({
     key: 'overview-context-filter',
-    defaultValue: 'both',
+    defaultValue: 'personal',
   });
 
   return (
