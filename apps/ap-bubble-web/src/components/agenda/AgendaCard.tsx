@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import type { AgendaEvent } from '../../api/types';
 import { useApi } from '../../hooks/useApi';
+import { type ContextFilter, matchesContext } from '../../lib/context';
 import { timeZone, today } from '../../lib/dates';
 import { Loadable } from '../common/Loadable';
 import { AgendaDayView } from './AgendaDayView';
@@ -11,11 +12,14 @@ import { WeekPicker } from './WeekPicker';
 
 const DAYS = 7;
 
-export function AgendaCard() {
+export function AgendaCard({ filter }: { filter: ContextFilter }) {
   const [firstDay, setFirstDay] = useState(today);
   const path = `/api/agenda?start=${firstDay}&days=${DAYS}&tz=${encodeURIComponent(timeZone)}`;
   const { data, error, loading } = useApi<AgendaEvent[]>(path);
-  const days = useMemo(() => groupByDay(data ?? [], firstDay, DAYS), [data, firstDay]);
+  const days = useMemo(() => {
+    const events = (data ?? []).filter((event) => matchesContext(event.context, filter));
+    return groupByDay(events, firstDay, DAYS);
+  }, [data, filter, firstDay]);
 
   return (
     <Card withBorder padding="lg">

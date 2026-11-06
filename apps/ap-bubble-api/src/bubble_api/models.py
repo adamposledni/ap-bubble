@@ -3,6 +3,7 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
+from bubble_core.accounts import Context
 from bubble_core.inputs import Status
 
 
@@ -13,6 +14,7 @@ class ApiModel(BaseModel):
 class AgendaEventOut(ApiModel):
     key: str
     calendar: str | None
+    context: Context
     title: str | None
     start: str
     end: str
@@ -24,6 +26,7 @@ class AgendaEventOut(ApiModel):
 class OpenTaskOut(ApiModel):
     id: int
     list_name: str | None
+    context: Context
     title: str | None
     notes: str | None
     due: str | None

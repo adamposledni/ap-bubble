@@ -17,6 +17,7 @@ def planner_open_tasks(conn: sqlite3.Connection) -> list[OpenTask]:
         OpenTask(
             id=task.id,
             list_name=task.list_name,
+            context=task.context,
             title=task.payload.get("title"),
             notes=None,
             due=task.due,

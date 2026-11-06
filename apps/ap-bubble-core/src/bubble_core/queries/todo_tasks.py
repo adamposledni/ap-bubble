@@ -17,6 +17,7 @@ def todo_open_tasks(conn: sqlite3.Connection) -> list[OpenTask]:
         OpenTask(
             id=task.id,
             list_name=task.list_name,
+            context=task.context,
             title=task.payload.get("title"),
             notes=_notes(task.payload.get("body")),
             due=task.due,

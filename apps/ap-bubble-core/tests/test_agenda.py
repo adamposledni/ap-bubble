@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from bubble_core.accounts import Account, upsert_account
 from bubble_core.queries.agenda import agenda
 
 PRAGUE = ZoneInfo("Europe/Prague")
@@ -79,6 +80,17 @@ def test_exceptions_replace_their_occurrences(
     save_event("s_2", deleted=True, status="cancelled", **cancelled)
 
     assert _week(conn) == [("Sync moved", "2026-03-09T13:00:00+00:00")]
+
+
+def test_events_carry_their_accounts_context(
+    conn: sqlite3.Connection, save_event: SaveEvent, account: Account
+) -> None:
+    save_event("e", summary="Trip", start={"date": "2026-03-10"}, end={"date": "2026-03-11"})
+    assert [e.context for e in agenda(conn, *WEEK_OF_9_MARCH, PRAGUE)] == ["personal"]
+
+    upsert_account(conn, account.provider, account.email, "work")
+
+    assert [e.context for e in agenda(conn, *WEEK_OF_9_MARCH, PRAGUE)] == ["work"]
 
 
 def test_events_of_removed_calendars_are_hidden(

@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 from bubble_core.log import get_logger
 from bubble_core.queries.agenda_event import (
     AgendaEvent,
+    Calendar,
     CalendarKey,
     Found,
     Window,
@@ -54,7 +55,7 @@ def google_events(conn: sqlite3.Connection, window: Window, tz: ZoneInfo) -> lis
 
 def _occurrences(
     event: _Event,
-    calendar: str | None,
+    calendar: Calendar,
     replaced: dict[SeriesKey, set[datetime]],
     window: Window,
     tz: ZoneInfo,
@@ -74,11 +75,12 @@ def _occurrences(
 
 
 def _to_agenda(
-    event: _Event, calendar: str | None, span: Span, key: str, recurring: bool
+    event: _Event, calendar: Calendar, span: Span, key: str, recurring: bool
 ) -> AgendaEvent:
     return AgendaEvent(
         key=key,
-        calendar=calendar,
+        calendar=calendar.name,
+        context=calendar.context,
         title=event.payload.get("summary"),
         start=as_text(span.start, span.all_day),
         end=as_text(span.end, span.all_day),

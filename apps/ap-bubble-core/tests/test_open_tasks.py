@@ -4,9 +4,21 @@ from typing import Any
 
 import pytest
 
+from bubble_core.accounts import Account, upsert_account
 from bubble_core.queries.tasks import OpenTask, open_tasks
 
 type SaveTask = Callable[..., None]
+
+
+def test_tasks_carry_their_accounts_context(
+    conn: sqlite3.Connection, save_task: SaveTask, account: Account
+) -> None:
+    save_task("call")
+    assert [task.context for task in open_tasks(conn)] == ["personal"]
+
+    upsert_account(conn, account.provider, account.email, "work")
+
+    assert [task.context for task in open_tasks(conn)] == ["work"]
 
 
 @pytest.fixture

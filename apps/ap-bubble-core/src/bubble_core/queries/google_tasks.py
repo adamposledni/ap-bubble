@@ -32,6 +32,7 @@ def _to_open(task: TaskRow, children: dict[tuple[ListKey, str], list[TaskRow]]) 
     return OpenTask(
         id=task.id,
         list_name=task.list_name,
+        context=task.context,
         title=task.payload.get("title"),
         notes=task.payload.get("notes"),
         due=task.due,

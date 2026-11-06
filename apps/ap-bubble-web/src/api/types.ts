@@ -1,8 +1,12 @@
 // JSON shapes of the API (apps/ap-bubble-api/src/bubble_api/models.py).
 
+/** Whether an item comes from a work or a personal account. */
+export type Context = 'work' | 'personal';
+
 export interface AgendaEvent {
   key: string;
   calendar: string | null;
+  context: Context;
   title: string | null;
   start: string; // UTC timestamp, or YYYY-MM-DD for all-day events
   end: string; // exclusive
@@ -14,6 +18,7 @@ export interface AgendaEvent {
 export interface OpenTask {
   id: number;
   listName: string | null;
+  context: Context;
   title: string | null;
   notes: string | null;
   due: string | null; // YYYY-MM-DD

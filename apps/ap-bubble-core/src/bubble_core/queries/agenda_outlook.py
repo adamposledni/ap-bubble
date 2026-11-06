@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from bubble_core.log import get_logger
-from bubble_core.queries.agenda_event import AgendaEvent, Found, Window, live_calendars
+from bubble_core.queries.agenda_event import AgendaEvent, Calendar, Found, Window, live_calendars
 from bubble_core.queries.event_times import Span, day_start
 
 _SOURCE = "outlook_calendar"
@@ -32,7 +32,7 @@ def outlook_events(conn: sqlite3.Connection, window: Window, tz: ZoneInfo) -> li
     return found
 
 
-def _found(row: sqlite3.Row, calendar: str | None, window: Window, tz: ZoneInfo) -> list[Found]:
+def _found(row: sqlite3.Row, calendar: Calendar, window: Window, tz: ZoneInfo) -> list[Found]:
     try:
         span = _span(row, tz)
     except ValueError:
@@ -48,10 +48,11 @@ def _span(row: sqlite3.Row, tz: ZoneInfo) -> Span:
     return Span(start, end, all_day=False)
 
 
-def _to_agenda(row: sqlite3.Row, calendar: str | None) -> AgendaEvent:
+def _to_agenda(row: sqlite3.Row, calendar: Calendar) -> AgendaEvent:
     return AgendaEvent(
         key=str(row["id"]),
-        calendar=calendar,
+        calendar=calendar.name,
+        context=calendar.context,
         title=row["title"],
         start=row["starts_at"],
         end=row["ends_at"],
