@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from bubble_curator.batches import pack, write_batches
+from bubble_curator.settings import FILE_CHARS
 from bubble_curator.unit import Unit
 
 
@@ -17,7 +18,15 @@ def test_units_are_packed_until_a_batch_is_full() -> None:
 def test_a_unit_too_big_for_any_batch_is_cut() -> None:
     [batch] = pack([_unit(1, 5000)], max_chars=1000)
 
-    assert batch.chars <= 1000
+    assert batch.weight <= 1000
+
+
+def test_attached_files_weigh_in_so_an_input_with_many_files_gets_its_own_batch() -> None:
+    with_files = Unit("input", "see files", sort_key="0", input_ids=[1], file_count=9)
+    batches = pack([_unit(1, 100), with_files, _unit(2, 100)], max_chars=2 * FILE_CHARS)
+
+    assert [len(b.units) for b in batches] == [1, 1, 1]
+    assert with_files.weight == len(with_files.render()) + 9 * FILE_CHARS
 
 
 def test_batches_are_written_as_numbered_files(tmp_path: Path) -> None:

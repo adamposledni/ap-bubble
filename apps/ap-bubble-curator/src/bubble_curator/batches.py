@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 @dataclass
 class Batch:
     units: list[Unit] = field(default_factory=list)
-    chars: int = 0
+    weight: int = 0
 
     @property
     def input_ids(self) -> list[int]:
@@ -29,11 +29,11 @@ def pack(units: list[Unit], max_chars: int) -> list[Batch]:
     batches: list[Batch] = []
     for unit in units:
         unit = _fit(unit, max_chars)
-        size = len(unit.render())
-        if not batches or batches[-1].chars + size > max_chars:
+        size = unit.weight
+        if not batches or batches[-1].weight + size > max_chars:
             batches.append(Batch())
         batches[-1].units.append(unit)
-        batches[-1].chars += size
+        batches[-1].weight += size
     logger.debug("%d units packed into %d batches", len(units), len(batches))
     return batches
 
@@ -54,4 +54,11 @@ def _fit(unit: Unit, max_chars: int) -> Unit:
     room = max_chars - len(unit.heading) - 20
     if len(unit.render()) <= max_chars:
         return unit
-    return Unit(unit.heading, clip(unit.body, room), unit.sort_key, unit.item_ids, unit.input_ids)
+    return Unit(
+        unit.heading,
+        clip(unit.body, room),
+        unit.sort_key,
+        unit.item_ids,
+        unit.input_ids,
+        unit.file_count,
+    )

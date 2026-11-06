@@ -54,3 +54,22 @@ def test_window_keeps_recent_items_upcoming_events_open_tasks_and_contacts() -> 
     done_long_ago = {"status": "completed", "updated": "2026-02-01T00:00:00Z"}
     assert not in_window(_item("google_tasks", "task", done_long_ago, starts_at=None), SINCE)
     assert in_window(_item("google_contacts", "contact", starts_at=None), SINCE)
+
+
+def test_events_of_skipped_calendars_are_noise() -> None:
+    holidays = "cs.czech#holiday@group.v.calendar.google.com"
+    shifts = "quh6h0ajl2qtrouii90g38el9davgdt3@import.calendar.google.com"
+    assert is_noise(_item("google_calendar", "event", container_id=holidays))
+    assert is_noise(_item("google_calendar", "event", container_id=shifts))
+    assert not is_noise(_item("google_calendar", "event", container_id="adam@example.com"))
+
+
+def test_service_contacts_are_noise_and_real_ones_are_kept() -> None:
+    def contact(**payload: Any) -> ChangedItem:
+        return _item("google_contacts", "contact", payload)
+
+    assert is_noise(contact())
+    assert is_noise(contact(phoneNumbers=[{"value": "155"}]))
+    assert is_noise(contact(phoneNumbers=[{"value": "112"}, {"value": "*77"}]))
+    assert not is_noise(contact(phoneNumbers=[{"value": "+420 466 100 777"}]))
+    assert not is_noise(contact(emailAddresses=[{"value": "a@b.cz"}]))

@@ -2,12 +2,14 @@
 
 Noise rules are deterministic: deleted items, containers (calendars, lists, chats, folders),
 Teams system messages, Outlook series masters (their occurrences are items of their own),
-promotions and newsletters.
+promotions and newsletters, events of skipped calendars (holidays, shifts) and service contacts
+(no email and no real phone number, e.g. 112).
 """
 
 from datetime import UTC, datetime, timedelta
 
 from bubble_curator.changes import ChangedItem
+from bubble_curator.settings import MIN_PHONE_DIGITS, SKIPPED_CALENDAR_PATTERNS
 
 CONTAINER_KINDS = {"calendar", "tasklist", "plan", "chat", "mailfolder"}
 _GMAIL_BULK_LABELS = {
@@ -30,6 +32,8 @@ def is_curatable(item: ChangedItem, since: str) -> bool:
 def is_noise(item: ChangedItem) -> bool:
     if item.deleted or item.kind in CONTAINER_KINDS:
         return True
+    if _is_skipped_calendar_event(item) or _is_service_contact(item):
+        return True
     payload = item.payload
     if item.kind == "chat_message":
         return payload.get("messageType") == "systemEventMessage"
@@ -40,6 +44,26 @@ def is_noise(item: ChangedItem) -> bool:
     if item.source == "gmail":
         return bool(_GMAIL_BULK_LABELS & set(payload.get("labelIds", []))) or _has_unsubscribe(item)
     return False
+
+
+def _is_skipped_calendar_event(item: ChangedItem) -> bool:
+    return item.kind == "event" and any(p in item.container_id for p in SKIPPED_CALENDAR_PATTERNS)
+
+
+def _is_service_contact(item: ChangedItem) -> bool:
+    """A contact without an email and without a real phone number (e.g. '155', '*77')."""
+    if item.kind != "contact":
+        return False
+    payload = item.payload
+    has_email = any(e.get("value") for e in payload.get("emailAddresses") or [])
+    has_phone = any(
+        _digit_count(e.get("value")) > MIN_PHONE_DIGITS for e in payload.get("phoneNumbers") or []
+    )
+    return not has_email and not has_phone
+
+
+def _digit_count(value: object) -> int:
+    return sum(ch.isdigit() for ch in str(value or ""))
 
 
 def in_window(item: ChangedItem, since: str) -> bool:

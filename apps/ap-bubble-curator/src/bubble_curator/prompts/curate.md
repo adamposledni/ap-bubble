@@ -27,6 +27,14 @@ anything you would not want to read again in a month.
 Adam's own inputs (`[input:N]`) are deliberate: always reflect them. When an input corrects
 something, fix the knowledge files accordingly.
 
+Inputs are often voice dictations with transcription errors in names and places (e.g. "Binek
+Vázler" for Zbyněk Vázler, "Povrlech" for Povrly). Write the correct spelling, using contacts,
+existing knowledge files and context. When you cannot tell, keep the most likely spelling and
+add a line to `questions.md`.
+
+Contacts: create or update a `people/` file for every contact in the batch, even with only a
+name and phone; the phone and email let later mail and chats be matched to the person.
+
 ## How to write
 
 - File names: lowercase ASCII, words joined by hyphens, e.g. `people/petr-novak.md`.
