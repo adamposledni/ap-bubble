@@ -8,14 +8,14 @@ from contextlib import closing
 from bubble_core.accounts import CONTEXTS, list_accounts
 from bubble_core.db import open_vault
 from bubble_core.log import get_logger, setup_logging
-from bubble_ingest.connect import connect_google
+from bubble_ingest.connect import connect_google, connect_microsoft
 from bubble_ingest.google.calendar import sync as google_calendar
 from bubble_ingest.google.contacts import sync as google_contacts
 from bubble_ingest.google.gmail import sync as gmail
 from bubble_ingest.google.tasks import sync as google_tasks
 
 APP_NAME = "ap-bubble-ingest"
-CONNECTORS: dict[str, Callable] = {"google": connect_google}
+CONNECTORS: dict[str, Callable] = {"google": connect_google, "microsoft": connect_microsoft}
 SYNCS: dict[str, Callable[[sqlite3.Connection], None]] = {
     "google_calendar": google_calendar.sync_all,
     "google_tasks": google_tasks.sync_all,
