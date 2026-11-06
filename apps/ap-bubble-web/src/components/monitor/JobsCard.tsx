@@ -1,23 +1,42 @@
-import { Badge, Card, Group, Stack, Table, Text, Title } from '@mantine/core';
+import { Badge, Card, Group, Stack, Table, Text, TextInput, Title } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
+import { useState } from 'react';
 
 import type { JobStatus } from '../../api/types';
 import { formatAgo, formatDateTime } from '../../lib/dates';
-import { jobLabel, scopeLabel } from '../../lib/jobs';
+import { jobKey, jobLabel, jobMatches, scopeLabel } from '../../lib/jobs';
 import { ErrorText } from './ErrorText';
 import { RunStatusBadge } from './RunStatusBadge';
 
+interface Props {
+  jobs: JobStatus[];
+  /** jobKey of the selected row, if any. */
+  selected: string | null;
+  onSelect: (key: string | null) => void;
+}
+
 /** One row per job and account: how its last run went and how fresh its data is. */
-export function SourcesCard({ jobs }: { jobs: JobStatus[] }) {
+export function JobsCard({ jobs, selected, onSelect }: Props) {
+  const [search, setSearch] = useState('');
+  const shown = jobs.filter((job) => jobMatches(job.jobName, job.scope, search));
+
   return (
     <Card withBorder padding="lg">
-      <Title order={3} mb="md">
-        Sources
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={3}>Jobs</Title>
+        <TextInput
+          placeholder="Search jobs"
+          size="xs"
+          leftSection={<IconSearch size={14} />}
+          value={search}
+          onChange={(event) => setSearch(event.currentTarget.value)}
+        />
+      </Group>
       <Table.ScrollContainer minWidth={640}>
         <Table verticalSpacing="xs" highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Source</Table.Th>
+              <Table.Th>Job</Table.Th>
               <Table.Th>Account</Table.Th>
               <Table.Th>Last run</Table.Th>
               <Table.Th>Last success</Table.Th>
@@ -25,19 +44,44 @@ export function SourcesCard({ jobs }: { jobs: JobStatus[] }) {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {jobs.map((job) => (
-              <SourceRow key={`${job.jobName}|${job.scope}`} job={job} />
-            ))}
+            {shown.map((job) => {
+              const key = jobKey(job.jobName, job.scope);
+              return (
+                <JobRow
+                  key={key}
+                  job={job}
+                  active={key === selected}
+                  onClick={() => onSelect(key === selected ? null : key)}
+                />
+              );
+            })}
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>
+      {shown.length === 0 && (
+        <Text size="sm" c="dimmed" mt="sm">
+          No job matches.
+        </Text>
+      )}
     </Card>
   );
 }
 
-function SourceRow({ job }: { job: JobStatus }) {
+function JobRow({
+  job,
+  active,
+  onClick,
+}: {
+  job: JobStatus;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <Table.Tr>
+    <Table.Tr
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
+      bg={active ? 'var(--mantine-color-indigo-light)' : undefined}
+    >
       <Table.Td>
         <Text size="sm" fw={500}>
           {jobLabel(job.jobName)}

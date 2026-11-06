@@ -14,7 +14,7 @@ export function HealthBanner({ jobs }: { jobs: JobStatus[] }) {
   }
   if (failed.length > 0) {
     return (
-      <Alert color="red" icon={<IconAlertTriangle size={18} />} title="Sync failed">
+      <Alert color="red" icon={<IconAlertTriangle size={18} />} title="Job failed">
         Last run failed: {names(failed)}.
       </Alert>
     );
@@ -29,7 +29,7 @@ export function HealthBanner({ jobs }: { jobs: JobStatus[] }) {
   }
   return (
     <Alert color="green" icon={<IconCircleCheck size={18} />}>
-      All sources synced in the last 24 hours.
+      All jobs ran successfully in the last 24 hours.
     </Alert>
   );
 }

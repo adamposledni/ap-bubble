@@ -44,14 +44,39 @@ export interface JobRun {
   scope: string | null;
   status: RunStatus;
   startedAt: string;
+  finishedAt: string | null;
   durationSeconds: number | null;
   itemsProcessed: number;
   error: string | null;
+  dryRun: boolean; // a curator run that only wrote its batch files
+}
+
+export interface RunningJob {
+  run: JobRun;
+  batchCurrent: number | null; // curator only
+  batchTotal: number | null;
+}
+
+export type BatchStatus = 'done' | 'failed' | 'running' | 'pending' | 'not_sent';
+
+export interface Batch {
+  name: string;
+  status: BatchStatus;
+  summary: string | null;
+  numTurns: number | null;
+  durationSeconds: number | null;
+  costUsd: number | null;
+}
+
+export interface RunDetail {
+  run: JobRun;
+  batches: Batch[]; // curator runs only
 }
 
 export interface Monitor {
   jobs: JobStatus[];
-  runs: JobRun[];
+  runs: JobRun[]; // the last 7 days
+  running: RunningJob[];
   queue: Partial<Record<InputStatus, number>>;
 }
 
