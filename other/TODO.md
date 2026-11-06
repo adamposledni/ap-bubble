@@ -72,6 +72,21 @@
       page metadata listed every run, page content (HTML) fetched only for new or changed pages.
 - [ ] Schedule ingest jobs (Windows Task Scheduler).
 
+## New sources
+
+- [ ] DataBrothers DWH: ingest selected data.
+- [ ] LinkedIn: monitor interesting posts.
+- [ ] Suunto: activities / health data.
+- [ ] Bank: transactions.
+- [ ] News: seznam.cz, Google News.
+
+## Actions (L3)
+
+- [ ] Upsert contact.
+- [ ] CRUD tasks.
+- [ ] Draft email.
+- [ ] CRUD calendar events.
+
 ## Curator
 
 - [ ] First real run (not run yet on purpose): try `.\tools\curator.ps1 run --dry-run`, read the batch
