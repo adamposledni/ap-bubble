@@ -25,7 +25,8 @@ Requirements and architecture: `other/REQUIREMENTS.md`.
 - Storage: SQLite.
 
 ## Runtime data and accounts
-- Runtime data lives outside the repo in `%LOCALAPPDATA%\ap-bubble\` (database, inbox attachments, logs).
+- Runtime data lives outside the repo in `%LOCALAPPDATA%\ap-bubble\` (database, inbox attachments,
+  knowledge files, curator runs, logs).
 - Microsoft and Google are connected data sources only, never the app's identity provider.
 - OAuth tokens are stored in Windows Credential Manager.
 

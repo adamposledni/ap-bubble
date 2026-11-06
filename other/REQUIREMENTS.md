@@ -129,6 +129,21 @@ flowchart LR
   - **Daily morning** — insight pass for the day/week.
 - Constraint: runs only while the PC is awake; backlog shown as pending on the audit page.
 
+#### Curator v1 (decided 2026-11-06)
+
+| Topic | Decision |
+|-------|----------|
+| Knowledge files | `%LOCALAPPDATA%\ap-bubble\knowledge\` (`people/`, `places/`, `topics/`, `me/`); no git yet. Markdown is the source of truth; L2 SQLite tables come with search. |
+| What is curated | Everything: queued L1 inputs and the L0 change set. |
+| Backlog | Only items from the last 30 days, then new changes; older 2026 items via a later backfill. |
+| Noise (skipped before AI) | Teams system messages; promotions and newsletters (Gmail Promotions / Social / Updates / Forums, `List-Unsubscribe`, Outlook "Other"); deleted items; containers (calendars, lists, chats, folders). |
+| Grouping | Teams messages per chat and day; mail per conversation; one unit per event, task, contact, input. |
+| Run | Python job `ap-bubble-curator run`: early exit when nothing to do; otherwise packs units into size-limited batches, writes each as a file, runs `claude -p` in the knowledge folder (tools: Read, Write, Edit, Glob, Grep; edits auto-accepted), logs the run in `lm_job_runs`. `--dry-run` only writes the batch files. |
+| L1 status | `queued` → `processing` while curated → `done` or `failed` (with error). |
+| L0 progress | A cursor over `(changed_run_id, item id)`, advanced only when all of a run's batches succeed; rows of ingest runs still running are left for later. |
+| Files of inputs | Text, PDF, images read by Claude directly; voice notes need transcription (later). |
+| Cadence | Started by hand for now; scheduled later together with ingest. |
+
 ## 6. L3 Actions (write-back) — future
 
 - AI produces a **proposed action** record (type, target system, account, payload), e.g.:
@@ -171,29 +186,30 @@ flowchart LR
 | Host | Local Windows PC, desktop-only access (no mobile for now) |
 | Ingest jobs | Python, Windows Task Scheduler |
 | Vault: L0, L1, L2 entities and insights, L3, LM | SQLite |
-| L2 knowledge files | Markdown files in a **separate git repo** (one file per person / place / topic) |
+| L2 knowledge files | Markdown files in `%LOCALAPPDATA%\ap-bubble\knowledge\` (one file per person / place / topic); git later |
 | Curator | Claude Code headless, Windows Task Scheduler |
 | Web app | FastAPI backend + React frontend, local service |
 | Chat connector | Python MCP server → Claude Desktop |
 | Search | Keyword search (v1) |
 
-**Repositories:** `ap-bubble` (code) and `ap-bubble-knowledge` (markdown vault) kept separate.
+**Repository:** `ap-bubble` (code). Knowledge files live with the runtime data, outside the repo; versioning them in git comes later.
 
 **Future:** cloud hosting with usage-based AI (previously considered Cloudflare); split is ready for it since ingest, vault and web app need no AI.
 
 ## 10. Proposed vault layout
 
 ```
-ap-bubble-knowledge/             # git repo
-├── people/
-│   └── petr-novak.md
-├── places/
-├── topics/
-└── me/                          # profile, household, tools I use
-
-data/
+%LOCALAPPDATA%\ap-bubble\
 ├── vault.db                     # SQLite: l0_, l1_, l2_, l3_, lm_ tables
-└── inbox/                       # L1 attachments (voice, docs)
+├── inbox/                       # L1 attachments (voice, docs)
+├── knowledge/                   # L2 markdown (git later)
+│   ├── people/
+│   │   └── petr-novak.md
+│   ├── places/
+│   ├── topics/
+│   └── me/                      # profile, household, tools I use
+├── curator/runs/<run id>/       # batch files given to Claude, and its output
+└── logs/
 ```
 
 ## 11. Deferred / out of scope (v1)
