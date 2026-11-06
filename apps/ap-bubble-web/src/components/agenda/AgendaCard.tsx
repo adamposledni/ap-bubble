@@ -10,7 +10,8 @@ import { AgendaDayView } from './AgendaDayView';
 import { groupByDay } from './groupByDay';
 import { WeekPicker } from './WeekPicker';
 
-const DAYS = 7;
+/** Today and tomorrow. */
+const DAYS = 2;
 
 export function AgendaCard({ filter }: { filter: ContextFilter }) {
   const [firstDay, setFirstDay] = useState(today);
