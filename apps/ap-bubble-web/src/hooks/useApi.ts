@@ -4,6 +4,8 @@ import { getJson } from '../api/client';
 
 export interface ApiState<T> {
   data: T | undefined;
+  /** ISO timestamp of the last successful fetch. */
+  updatedAt: string | undefined;
   error: string | undefined;
   loading: boolean;
   reload: () => void;
@@ -12,6 +14,7 @@ export interface ApiState<T> {
 /** GETs path (again whenever it changes, and every refreshMs if given). */
 export function useApi<T>(path: string, refreshMs?: number): ApiState<T> {
   const [data, setData] = useState<T>();
+  const [updatedAt, setUpdatedAt] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [version, setVersion] = useState(0);
@@ -23,6 +26,7 @@ export function useApi<T>(path: string, refreshMs?: number): ApiState<T> {
     getJson<T>(path, controller.signal)
       .then((result) => {
         setData(result);
+        setUpdatedAt(new Date().toISOString());
         setError(undefined);
       })
       .catch((reason: Error) => {
@@ -40,5 +44,5 @@ export function useApi<T>(path: string, refreshMs?: number): ApiState<T> {
     return () => clearInterval(timer);
   }, [refreshMs, reload]);
 
-  return { data, error, loading, reload };
+  return { data, updatedAt, error, loading, reload };
 }
