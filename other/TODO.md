@@ -39,6 +39,6 @@
       started at logon (e.g. Task Scheduler) instead of `tools/web.ps1`.
 - [ ] Overview reads L0 directly; switch it to the curated layer (L2) once it exists.
 
-- [ ] Monitor / audit page: job runs from `lm_job_runs` (status, duration, errors, items processed),
-      data freshness per source and account, warning banner when ingest or curator failed or data is
-      stale (REQUIREMENTS §8.1 Audit).
+- [ ] Monitor follow-ups (the basic page exists): show the failed/stale banner on the Overview too,
+      detect runs stuck in `running` (a killed process never finishes its row), add curator runs and
+      executed actions once they exist.

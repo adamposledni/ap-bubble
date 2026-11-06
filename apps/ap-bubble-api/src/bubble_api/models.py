@@ -30,6 +30,34 @@ class OpenTaskOut(ApiModel):
     subtasks: list["OpenTaskOut"]
 
 
+class JobStatusOut(ApiModel):
+    job_name: str
+    scope: str | None
+    last_status: str
+    last_started_at: str
+    last_success_at: str | None
+    last_error: str | None
+    items_in_l0: int | None
+    stale: bool
+
+
+class JobRunOut(ApiModel):
+    id: int
+    job_name: str
+    scope: str | None
+    status: str
+    started_at: str
+    duration_seconds: float | None
+    items_processed: int
+    error: str | None
+
+
+class MonitorOut(ApiModel):
+    jobs: list[JobStatusOut]
+    runs: list[JobRunOut]
+    queue: dict[str, int]
+
+
 class InputFileOut(ApiModel):
     id: int
     name: str

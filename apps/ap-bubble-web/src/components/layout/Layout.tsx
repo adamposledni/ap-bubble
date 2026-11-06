@@ -1,12 +1,13 @@
 import { AppShell, Burger, Group, NavLink, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconInbox, IconLayoutDashboard } from '@tabler/icons-react';
+import { IconActivity, IconInbox, IconLayoutDashboard } from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 
 const PAGES = [
   { path: '/', label: 'Overview', icon: IconLayoutDashboard },
   { path: '/input', label: 'Input', icon: IconInbox },
+  { path: '/monitor', label: 'Monitor', icon: IconActivity },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

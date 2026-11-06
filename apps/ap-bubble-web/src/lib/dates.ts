@@ -54,3 +54,31 @@ export function formatTime(timestamp: string): string {
 export function formatDateTime(timestamp: string): string {
   return dateTimeFormat.format(new Date(timestamp));
 }
+
+const relativeFormat = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+const AGO_STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['second', 60],
+  ['minute', 60],
+  ['hour', 24],
+  ['day', 30],
+  ['month', 12],
+  ['year', Infinity],
+];
+
+/** E.g. "5 minutes ago"; seconds round to "now". */
+export function formatAgo(timestamp: string): string {
+  let value = (new Date(timestamp).getTime() - Date.now()) / 1000;
+  for (const [unit, size] of AGO_STEPS) {
+    if (Math.abs(value) < size) {
+      const rounded = unit === 'second' ? 0 : Math.round(value);
+      return relativeFormat.format(rounded, unit);
+    }
+    value /= size;
+  }
+  return formatDateTime(timestamp);
+}
+
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)} s`;
+  return `${Math.floor(seconds / 60)} min ${Math.round(seconds % 60)} s`;
+}

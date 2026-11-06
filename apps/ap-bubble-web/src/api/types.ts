@@ -20,6 +20,36 @@ export interface OpenTask {
   subtasks: OpenTask[];
 }
 
+export type RunStatus = 'running' | 'succeeded' | 'failed';
+
+export interface JobStatus {
+  jobName: string;
+  scope: string | null; // e.g. account key 'google:me@gmail.com'
+  lastStatus: RunStatus;
+  lastStartedAt: string;
+  lastSuccessAt: string | null;
+  lastError: string | null;
+  itemsInL0: number | null;
+  stale: boolean;
+}
+
+export interface JobRun {
+  id: number;
+  jobName: string;
+  scope: string | null;
+  status: RunStatus;
+  startedAt: string;
+  durationSeconds: number | null;
+  itemsProcessed: number;
+  error: string | null;
+}
+
+export interface Monitor {
+  jobs: JobStatus[];
+  runs: JobRun[];
+  queue: Partial<Record<InputStatus, number>>;
+}
+
 export type InputStatus = 'queued' | 'processing' | 'done' | 'failed';
 
 export interface InputFile {

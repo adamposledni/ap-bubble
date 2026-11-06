@@ -20,6 +20,18 @@ def test_agenda_and_tasks_of_an_empty_vault(client: TestClient) -> None:
     assert client.get("/api/tasks").json() == []
 
 
+def test_monitor_of_an_empty_vault(client: TestClient) -> None:
+    response = client.get("/api/monitor")
+
+    assert (response.status_code, response.json()) == (200, {"jobs": [], "runs": [], "queue": {}})
+
+
+def test_monitor_counts_the_queue(client: TestClient) -> None:
+    client.post("/api/inputs", data={"text": "note"})
+
+    assert client.get("/api/monitor").json()["queue"] == {"queued": 1}
+
+
 def test_unknown_time_zone_is_rejected(client: TestClient) -> None:
     response = client.get("/api/agenda", params={"start": "2026-11-05", "tz": "Mars/Base"})
 
