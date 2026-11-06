@@ -1,12 +1,18 @@
 import { AppShell, Burger, Group, NavLink, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconActivity, IconInbox, IconLayoutDashboard } from '@tabler/icons-react';
+import {
+  IconActivity,
+  IconHelpCircle,
+  IconInbox,
+  IconLayoutDashboard,
+} from '@tabler/icons-react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 
 const PAGES = [
   { path: '/', label: 'Overview', icon: IconLayoutDashboard },
   { path: '/input', label: 'Input', icon: IconInbox },
+  { path: '/questions', label: 'Questions', icon: IconHelpCircle },
   { path: '/monitor', label: 'Monitor', icon: IconActivity },
 ];
 
