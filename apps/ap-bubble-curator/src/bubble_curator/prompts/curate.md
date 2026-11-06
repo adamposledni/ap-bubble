@@ -24,6 +24,10 @@ projects and their status, places that matter and why.
 Skip small talk, routine logistics that are over, newsletters, automatic notifications, and
 anything you would not want to read again in a month.
 
+Single appointments (doctor, dentist, shifts, meetings, a dinner) do not go into knowledge files:
+the calendar already holds them. Keep only what lasts: a recurring pattern ("physiotherapy for
+her hip, autumn 2026"), and key plans and events such as trips, weddings, moves or deadlines.
+
 Adam's own inputs (`[input:N]`) are deliberate: always reflect them. When an input corrects
 something, fix the knowledge files accordingly.
 
@@ -58,6 +62,8 @@ name and phone; the phone and email let later mail and chats be matched to the p
 - Every fact cites where it came from: `- Prefers calls before 9:00 (l0:12345, 2026-10-02)` or
   `(input:7)`. Keep the citation of the source you actually read.
 - Write in English; keep names, places and quotes in their original language and spelling.
+- When a name is corrected, rename the file to match it and update every link to it (Grep for
+  the old file name).
 - Merge, don't duplicate. Keep files short; replace outdated facts (mention the change in the
   Timeline) rather than piling up contradictions.
 - Link related files with relative markdown links, e.g. `[Petr Novák](../people/petr-novak.md)`.
