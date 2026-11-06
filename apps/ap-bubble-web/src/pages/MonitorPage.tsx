@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 import type { Monitor } from '../api/types';
@@ -34,8 +34,7 @@ export function MonitorPage() {
 
   return (
     <Stack gap="md">
-      <Group justify="space-between">
-        <Title order={2}>Monitor</Title>
+      <Group justify="flex-end">
         <RefreshControl loading={loading} updatedAt={updatedAt} onRefresh={reload} />
       </Group>
       <Loadable loading={loading} error={error} hasData={data !== undefined}>

@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router';
 
 import type { Question } from '../../api/types';
 import { useApi } from '../../hooks/useApi';
+import { PAGE_TITLES } from '../../lib/pages';
 
 const QUESTIONS_REFRESH_MS = 60_000;
 const ICON_PROPS = { size: 18, stroke: 1.5 };
@@ -15,13 +16,13 @@ export function NavButtons() {
   return (
     <Group gap="xs">
       {pathname !== '/' && (
-        <NavButton to="/" label="Overview">
+        <NavButton to="/" label={PAGE_TITLES['/']}>
           <IconLayoutDashboard {...ICON_PROPS} />
         </NavButton>
       )}
       {pathname !== '/input' && <InputButton />}
       {pathname !== '/monitor' && (
-        <NavButton to="/monitor" label="Monitor">
+        <NavButton to="/monitor" label={PAGE_TITLES['/monitor']}>
           <IconActivity {...ICON_PROPS} />
         </NavButton>
       )}
@@ -32,7 +33,8 @@ export function NavButtons() {
 /** Input, with a badge of the open questions waiting there. */
 function InputButton() {
   const pending = useApi<Question[]>('/api/questions', QUESTIONS_REFRESH_MS).data?.length ?? 0;
-  const label = pending > 0 ? `Input · ${pending} open questions` : 'Input';
+  const title = PAGE_TITLES['/input'];
+  const label = pending > 0 ? `${title} · ${pending} open questions` : title;
   return (
     <Indicator label={pending} size={16} disabled={pending === 0}>
       <NavButton to="/input" label={label}>
