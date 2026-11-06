@@ -1,15 +1,13 @@
-import { Group, Stack } from '@mantine/core';
+import { Grid, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 import type { Monitor } from '../api/types';
 import { Loadable } from '../components/common/Loadable';
-import { HealthBanner } from '../components/monitor/HealthBanner';
 import { JobsCard } from '../components/monitor/JobsCard';
-import { RefreshControl } from '../components/monitor/RefreshControl';
+import { MonitorSummary } from '../components/monitor/MonitorSummary';
 import { RunDrawer } from '../components/monitor/RunDrawer';
 import { RunningNow } from '../components/monitor/RunningNow';
 import { RunsCard } from '../components/monitor/RunsCard';
-import { StatTiles } from '../components/monitor/StatTiles';
 import { useApi } from '../hooks/useApi';
 import { jobKey, jobLabel, scopeLabel } from '../lib/jobs';
 
@@ -33,24 +31,26 @@ export function MonitorPage() {
   );
 
   return (
-    <Stack gap="md">
-      <Group justify="flex-end">
-        <RefreshControl loading={loading} updatedAt={updatedAt} onRefresh={reload} />
-      </Group>
+    <Stack gap="sm">
+      <MonitorSummary monitor={data} loading={loading} updatedAt={updatedAt} onRefresh={reload} />
       <Loadable loading={loading} error={error} hasData={data !== undefined}>
         {data && (
-          <Stack gap="md">
+          <Stack gap="sm">
             <RunningNow running={data.running} />
-            <HealthBanner jobs={data.jobs} />
-            <StatTiles monitor={data} />
-            <JobsCard jobs={data.jobs} selected={selectedJob} onSelect={setSelectedJob} />
-            <RunsCard
-              runs={runs}
-              filterLabel={job ? jobFilterLabel(job.jobName, job.scope) : null}
-              onClearFilter={() => setSelectedJob(null)}
-              selectedRunId={selectedRun}
-              onSelectRun={setSelectedRun}
-            />
+            <Grid gutter="sm">
+              <Grid.Col span={{ base: 12, lg: 5 }}>
+                <JobsCard jobs={data.jobs} selected={selectedJob} onSelect={setSelectedJob} />
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, lg: 7 }}>
+                <RunsCard
+                  runs={runs}
+                  filterLabel={job ? jobFilterLabel(job.jobName, job.scope) : null}
+                  onClearFilter={() => setSelectedJob(null)}
+                  selectedRunId={selectedRun}
+                  onSelectRun={setSelectedRun}
+                />
+              </Grid.Col>
+            </Grid>
           </Stack>
         )}
       </Loadable>

@@ -9,7 +9,7 @@ import { DryRunBadge } from './DryRunBadge';
 export function RunningNow({ running }: { running: RunningJob[] }) {
   if (running.length === 0) return null;
   return (
-    <Alert color="indigo" icon={<Loader size={16} color="indigo" />} title="Running now">
+    <Alert color="indigo" py="xs" icon={<Loader size={16} color="indigo" />}>
       <Stack gap="xs">
         {running.map((job) => (
           <RunningRow key={job.run.id} job={job} />
