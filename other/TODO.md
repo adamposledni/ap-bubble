@@ -103,6 +103,8 @@
       curated twice (the prompt merges facts, so mostly harmless).
 - [ ] Knowledge files are not versioned; put `%LOCALAPPDATA%\ap-bubble\knowledge` under git later.
 - [ ] Insights (birthdays, unanswered mail, conflicts) and L3 action proposals.
+- [ ] Insight: warn when a recurring event series ends soon (last occurrence from the series'
+      UNTIL / COUNT in L0), so it can be extended. Plain code, no AI needed (P1).
 
 ## Web UI
 
@@ -111,5 +113,5 @@
 - [ ] Overview reads L0 directly; switch it to the curated layer (L2) once it exists.
 
 - [ ] Monitor follow-ups (the basic page exists): show the failed/stale banner on the Overview too,
-      detect runs stuck in `running` (a killed process never finishes its row), add curator runs and
+      detect runs stuck in `running` (a killed process- never finishes its row), add curator runs and
       executed actions once they exist.

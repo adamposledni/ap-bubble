@@ -122,7 +122,8 @@ flowchart LR
 - Responsibilities:
   - Turn input data into / update knowledge markdown files.
   - Entity resolution (see §7).
-  - Generate insights (birthdays, unanswered mail, conflicts, today/week overview).
+  - Generate insights (birthdays, unanswered mail, conflicts, recurring events about to end,
+    today/week overview).
   - Propose actions (see §6).
 - Cadence (proposal):
   - **Hourly** — input queue + incremental changes.
