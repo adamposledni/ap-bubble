@@ -1,10 +1,11 @@
-"""Monitoring: the state of every job per scope, recent runs, L0 item counts, the L1 queue (LM)."""
+"""Monitoring: the state of every job per scope, runs, L0 item counts, the L1 queue (LM)."""
 
 import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 from bubble_core.log import get_logger
+from bubble_core.queries.job_runs import DRY_RUN_JOB, JobRun, RunningJob, recent_runs, running_jobs
 
 STALE_AFTER = timedelta(hours=24)
 _INGEST_PREFIX = "ingest."
@@ -27,36 +28,29 @@ class JobStatus:
 
 
 @dataclass(frozen=True)
-class JobRun:
-    id: int
-    job_name: str
-    scope: str | None
-    status: str
-    started_at: str
-    duration_seconds: float | None
-    items_processed: int
-    error: str | None
-
-
-@dataclass(frozen=True)
 class Monitor:
     jobs: list[JobStatus]
-    runs: list[JobRun]
+    runs: list[JobRun]  # last 7 days, dry runs included
+    running: list[RunningJob]
     queue: dict[str, int]  # L1 inputs per status
 
 
-def monitor(conn: sqlite3.Connection, run_limit: int = 50) -> Monitor:
-    result = Monitor(_job_statuses(conn), _recent_runs(conn, run_limit), _queue_counts(conn))
+def monitor(conn: sqlite3.Connection) -> Monitor:
+    result = Monitor(
+        _job_statuses(conn), recent_runs(conn), running_jobs(conn), _queue_counts(conn)
+    )
     logger.debug("Monitor: %d jobs, %d runs", len(result.jobs), len(result.runs))
     return result
 
 
 def _job_statuses(conn: sqlite3.Connection) -> list[JobStatus]:
+    """Latest run per job and scope; dry runs are no job of their own (and never count)."""
     rows = conn.execute(
         "SELECT r.*, (SELECT MAX(s.finished_at) FROM lm_job_runs s WHERE s.job_name = r.job_name "
         "AND s.scope IS r.scope AND s.status = 'succeeded') AS last_success_at "
-        "FROM lm_job_runs r WHERE r.id = (SELECT MAX(x.id) FROM lm_job_runs x "
-        "WHERE x.job_name = r.job_name AND x.scope IS r.scope) ORDER BY r.job_name, r.scope"
+        "FROM lm_job_runs r WHERE r.job_name != ? AND r.id = (SELECT MAX(x.id) FROM lm_job_runs x "
+        "WHERE x.job_name = r.job_name AND x.scope IS r.scope) ORDER BY r.job_name, r.scope",
+        (DRY_RUN_JOB,),
     ).fetchall()
     counts = _item_counts(conn)
     stale_before = (datetime.now(UTC) - STALE_AFTER).isoformat(timespec="seconds")
@@ -70,23 +64,6 @@ def _job_statuses(conn: sqlite3.Connection) -> list[JobStatus]:
             last_error=row["error"],
             items_in_l0=_items_of(row["job_name"], row["scope"], counts),
             stale=(row["last_success_at"] or "") < stale_before,
-        )
-        for row in rows
-    ]
-
-
-def _recent_runs(conn: sqlite3.Connection, limit: int) -> list[JobRun]:
-    rows = conn.execute("SELECT * FROM lm_job_runs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
-    return [
-        JobRun(
-            id=row["id"],
-            job_name=row["job_name"],
-            scope=row["scope"],
-            status=row["status"],
-            started_at=row["started_at"],
-            duration_seconds=_duration(row["started_at"], row["finished_at"]),
-            items_processed=row["items_processed"],
-            error=row["error"],
         )
         for row in rows
     ]
@@ -111,11 +88,3 @@ def _items_of(job_name: str, scope: str | None, counts: dict[tuple[str, str], in
     if not job_name.startswith(_INGEST_PREFIX) or scope is None:
         return None
     return counts.get((job_name.removeprefix(_INGEST_PREFIX), scope), 0)
-
-
-def _duration(started_at: str, finished_at: str | None) -> float | None:
-    if finished_at is None:
-        return None
-    return (
-        datetime.fromisoformat(finished_at) - datetime.fromisoformat(started_at)
-    ).total_seconds()

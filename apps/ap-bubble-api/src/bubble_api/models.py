@@ -50,15 +50,38 @@ class JobRunOut(ApiModel):
     scope: str | None
     status: str
     started_at: str
+    finished_at: str | None
     duration_seconds: float | None
     items_processed: int
     error: str | None
+    dry_run: bool
+
+
+class RunningJobOut(ApiModel):
+    run: JobRunOut
+    batch_current: int | None
+    batch_total: int | None
 
 
 class MonitorOut(ApiModel):
     jobs: list[JobStatusOut]
     runs: list[JobRunOut]
+    running: list[RunningJobOut]
     queue: dict[str, int]
+
+
+class BatchOut(ApiModel):
+    name: str
+    status: str
+    summary: str | None
+    num_turns: int | None
+    duration_seconds: float | None
+    cost_usd: float | None
+
+
+class RunDetailOut(ApiModel):
+    run: JobRunOut
+    batches: list[BatchOut]
 
 
 class InputFileOut(ApiModel):
