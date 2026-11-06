@@ -5,6 +5,7 @@ from pydantic.alias_generators import to_camel
 
 from bubble_core.accounts import Context
 from bubble_core.inputs import Status
+from bubble_core.knowledge import Folder
 
 
 class ApiModel(BaseModel):
@@ -76,3 +77,45 @@ class InputOut(ApiModel):
     created_at: str
     processed_at: str | None
     files: list[InputFileOut]
+
+
+class SnippetPartOut(ApiModel):
+    text: str
+    match: bool
+
+
+class KnowledgeHitOut(ApiModel):
+    folder: Folder
+    slug: str
+    name: str
+    tags: list[str]
+    updated: str | None
+    snippet: list[SnippetPartOut]
+
+
+class KnowledgeSearchOut(ApiModel):
+    total: int
+    hits: list[KnowledgeHitOut]
+
+
+class KnowledgeMetaOut(ApiModel):
+    name: str
+    aliases: list[str]
+    emails: list[str]
+    phones: list[str]
+    tags: list[str]
+    updated: str | None
+
+
+class KnowledgeRefOut(ApiModel):
+    folder: Folder
+    slug: str
+    name: str
+
+
+class KnowledgeDocOut(ApiModel):
+    folder: Folder
+    slug: str
+    meta: KnowledgeMetaOut
+    body: str
+    backlinks: list[KnowledgeRefOut]

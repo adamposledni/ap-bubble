@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from bubble_api.app import create_app
+from bubble_core.paths import knowledge_dir
 
 
 @pytest.fixture
@@ -64,3 +65,23 @@ def test_queued_input_is_deleted(client: TestClient) -> None:
     assert client.delete(f"/api/inputs/{created['id']}").status_code == 204
     assert client.get("/api/inputs").json() == []
     assert client.delete(f"/api/inputs/{created['id']}").status_code == 404
+
+
+def test_knowledge_search_and_doc(client: TestClient) -> None:
+    people = knowledge_dir() / "people"
+    people.mkdir(parents=True)
+    (people / "petr-novak.md").write_text("---\nname: Petr Novák\n---\nColleague.", "utf-8")
+    (people / "jana.md").write_text("---\nname: Jana\n---\nKnows [Petr](petr-novak.md).", "utf-8")
+
+    found = client.get("/api/knowledge", params={"q": "novak", "folder": "people"}).json()
+    doc = client.get("/api/knowledge/people/petr-novak").json()
+
+    assert (found["total"], found["hits"][0]["slug"]) == (1, "petr-novak")
+    assert (doc["meta"]["name"], doc["body"]) == ("Petr Novák", "Colleague.")
+    assert doc["backlinks"] == [{"folder": "people", "slug": "jana", "name": "Jana"}]
+
+
+def test_unknown_knowledge_doc_is_not_found(client: TestClient) -> None:
+    assert client.get("/api/knowledge/people/missing").status_code == 404
+    assert client.get("/api/knowledge/people/..%5Cvault").status_code == 404
+    assert client.get("/api/knowledge/secrets/x").status_code == 422
