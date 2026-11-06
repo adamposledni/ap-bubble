@@ -107,14 +107,14 @@ def _curation_flags(run_dir: Path) -> list[str]:
 
 
 def _summary(completed: subprocess.CompletedProcess[str]) -> str:
-    if completed.returncode != 0:
-        tail = (completed.stderr or completed.stdout)[-_ERROR_TAIL:]
-        raise CurationFailed(f"Claude exited with {completed.returncode}: {tail}")
+    """Claude's summary; on failure its own error message when the JSON result has one."""
     try:
         result = json.loads(completed.stdout)
     except json.JSONDecodeError as error:
-        raise CurationFailed("Claude returned no JSON result") from error
-    if result.get("is_error"):
-        raise CurationFailed(f"Claude reported an error: {str(result.get('result'))[:_ERROR_TAIL]}")
+        tail = (completed.stderr or completed.stdout)[-_ERROR_TAIL:]
+        raise CurationFailed(f"Claude exited with {completed.returncode}: {tail}") from error
+    if completed.returncode != 0 or result.get("is_error"):
+        message = str(result.get("result"))[:_ERROR_TAIL]
+        raise CurationFailed(f"Claude failed (exit {completed.returncode}): {message}")
     logger.info("Claude finished in %s turns", result.get("num_turns", "?"))
     return str(result.get("result", ""))

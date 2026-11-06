@@ -81,6 +81,11 @@ def test_failures_raise_curation_failed(monkeypatch: pytest.MonkeyPatch, batch: 
     with pytest.raises(CurationFailed, match="limit"):
         curate_batch(batch, index)
 
+    result = json.dumps({"is_error": True, "result": "model needs a newer version"})
+    _use(monkeypatch, FakeProcess(returncode=1, stdout=result))
+    with pytest.raises(CurationFailed, match="newer version"):
+        curate_batch(batch, index)
+
 
 def test_instructions_ship_with_the_package() -> None:
     assert "curator of Adam's knowledge base" in claude.instructions()
