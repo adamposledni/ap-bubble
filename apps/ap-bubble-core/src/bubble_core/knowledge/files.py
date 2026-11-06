@@ -1,0 +1,47 @@
+"""Reading knowledge files; only <folder>/<slug>.md files of the knowledge folder are reachable."""
+
+import re
+from pathlib import Path
+
+from bubble_core.knowledge.front_matter import split_front_matter
+from bubble_core.knowledge.model import FOLDERS, Folder, KnowledgeFile, meta_from
+from bubble_core.log import get_logger
+from bubble_core.paths import knowledge_dir
+
+# No path separators and no leading dot: a slug can never leave its folder.
+_SLUG = re.compile(r"\w[\w.-]*")
+
+logger = get_logger(__name__)
+
+
+class KnowledgeNotFound(Exception):
+    pass
+
+
+def list_files(folder: Folder | None = None) -> list[KnowledgeFile]:
+    """Every knowledge file, or those of one folder (questions.md in the root is not one)."""
+    root = knowledge_dir()
+    folders = FOLDERS if folder is None else (folder,)
+    files = [_load(name, path) for name in folders for path in sorted((root / name).glob("*.md"))]
+    logger.debug("Read %d knowledge files (folder %s)", len(files), folder or "all")
+    return files
+
+
+def read_file(folder: Folder, slug: str) -> KnowledgeFile:
+    path = _path(folder, slug)
+    if not path.is_file():
+        raise KnowledgeNotFound(f"No knowledge file {folder}/{slug}")
+    return _load(folder, path)
+
+
+def _path(folder: str, slug: str) -> Path:
+    if folder not in FOLDERS or not _SLUG.fullmatch(slug):
+        logger.warning("Rejected knowledge path %r/%r", folder, slug)
+        raise KnowledgeNotFound(f"No knowledge file {folder}/{slug}")
+    return knowledge_dir() / folder / f"{slug}.md"
+
+
+def _load(folder: Folder, path: Path) -> KnowledgeFile:
+    logger.trace("Reading %s", path)
+    raw, body = split_front_matter(path.read_text(encoding="utf-8", errors="replace"))
+    return KnowledgeFile(folder=folder, slug=path.stem, meta=meta_from(raw, path.stem), body=body)
