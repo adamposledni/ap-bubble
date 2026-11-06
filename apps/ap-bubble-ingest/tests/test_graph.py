@@ -66,6 +66,21 @@ def test_expired_delta_link_raises_cursor_expired() -> None:
         graph.get_delta(session, "https://start", None, "https://old-delta")  # type: ignore[arg-type]
 
 
+def test_sync_state_error_on_delta_link_raises_cursor_expired() -> None:
+    body = {"error": {"code": "syncStateNotFound", "message": "Sync state not found"}}
+    session = FakeSession(_response(400, body))
+
+    with pytest.raises(CursorExpired):
+        graph.get_delta(session, "https://start", None, "https://old-delta")  # type: ignore[arg-type]
+
+
+def test_other_client_errors_are_not_treated_as_expired() -> None:
+    session = FakeSession(_response(400, {"error": {"code": "BadRequest"}}))
+
+    with pytest.raises(requests.HTTPError):
+        graph.get_delta(session, "https://start", None, "https://old-delta")  # type: ignore[arg-type]
+
+
 def test_delta_without_link_starts_from_the_url() -> None:
     session = FakeSession(_response(200, {"value": [], "@odata.deltaLink": "https://delta"}))
 

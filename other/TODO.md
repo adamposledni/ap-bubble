@@ -5,9 +5,9 @@
 - [ ] Google Calendar: load history before 2026-01-01. Move `SYNC_FROM` in
       `apps/ap-bubble-ingest/src/bubble_ingest/google/calendar/sync.py` back (or drop the limit),
       then delete the `google_calendar` rows in `lm_sync_cursors` to force a full load.
-- [ ] Google Calendar / Tasks: a removed calendar or task list is flagged deleted (kind `calendar` /
-      `tasklist`), but its events / tasks are not; readers filter by live containers. Flag them too
-      if other readers (curator, MCP) need it.
+- [ ] Google Calendar / Tasks, Outlook calendar, To Do: a removed calendar or task list is flagged
+      deleted (kind `calendar` / `tasklist`), but its events / tasks are not; readers filter by live
+      containers. Flag them too if other readers (curator, MCP) need it.
 - [ ] Recurring events sit in L0 as series + exceptions; expand them into occurrences where
       dashboard / MCP queries need them.
 - [ ] Google Tasks: incremental sync (`updatedMin`) never sees tasks that vanish without a deleted
@@ -26,6 +26,31 @@
       fetch), so a downloader fetches the message again and finds the part by partId.
 - [ ] Gmail: drafts are ingested like other mail; each draft save is a new message (old one
       deleted). Exclude drafts if that churn bothers the curator.
+- [ ] Outlook calendar: load history before 2026-01-01 (move `SYNC_FROM` in
+      `apps/ap-bubble-ingest/src/bubble_ingest/microsoft/calendar/sync.py`, then delete the
+      `outlook_calendar` rows in `lm_sync_cursors`).
+- [ ] Outlook calendar: the window ends at `SYNC_UNTIL` = 2028-01-01 (the delta link encodes the
+      window), so the look-ahead shrinks; move it forward before late 2027, then delete the
+      `outlook_calendar` rows in `lm_sync_cursors`.
+- [ ] Outlook calendar: the 14 calendars shared with me by colleagues are skipped (only own ones
+      sync); add an opt-in list if some should show in the agenda (they would load fully each run).
+- [ ] Outlook calendar: non-default calendars load fully every run (v1.0 documents calendarView delta
+      only for the default calendar); switch once v1.0 documents per-calendar delta.
+- [ ] Outlook calendar: delta also returns series masters (kept in L0, left out of the agenda) and
+      `@removed` entries for events outside the window; unknown ids among those become deleted rows.
+- [ ] Outlook mail: load mail before 2026-01-01 (move `SYNC_FROM` in
+      `apps/ap-bubble-ingest/src/bubble_ingest/microsoft/mail/scope.py`, then delete the
+      `outlook_mail` rows in `lm_sync_cursors`).
+- [ ] Outlook mail: Graph caps a filtered first load at 5,000 messages per folder; a folder that
+      reaches it is loaded unfiltered (its whole history is downloaded once, older mail dropped).
+- [ ] Outlook mail: attachments are not downloaded (only `hasAttachments`); `uniqueBody` (only the
+      new part of a reply) could save curator tokens; archive and shared mailboxes are not ingested.
+- [ ] Planner: task details (description, checklist, references) need one call per task and are not
+      ingested, so open tasks show no notes for Planner. Every run is a full load (no v1.0 delta).
+- [ ] To Do: checklist items and linked resources (e.g. the mail behind a Flagged email task) are not
+      ingested.
+- [ ] Microsoft due dates are converted to this PC's time zone at ingest
+      (`bubble_ingest/microsoft/due_dates.py`); a zone change does not recompute stored rows.
 - [ ] Check performance improvements to ingestion: multiple async/concurrent requests (per container,
       per account, per source). Mind per-user quotas: Gmail measured ~100 full messages/min, and a
       run right after a full load waits out the rate limit (incremental with 0 changes took 65 s).

@@ -92,17 +92,26 @@ def get_delta(
 ) -> Pages:
     """Changes since delta_link, or everything from url + params when there is none.
 
-    Raises CursorExpired when Graph no longer accepts the delta link (410 Gone).
+    Raises CursorExpired when Graph no longer accepts the delta link.
     """
     try:
         if delta_link:
             return get_all_pages(session, delta_link, None, headers)
         return get_all_pages(session, url, params, headers)
     except requests.HTTPError as error:
-        gone = error.response is not None and error.response.status_code == _HTTP_GONE
-        if delta_link and gone:
+        if delta_link and is_expired_delta(error):
             raise CursorExpired(url) from error
         raise
+
+
+def is_expired_delta(error: requests.HTTPError) -> bool:
+    """410 Gone, or a 4xx naming the sync state (Graph: 'error codes such as syncStateNotFound')."""
+    response = error.response
+    if response is None:
+        return False
+    if response.status_code == _HTTP_GONE:
+        return True
+    return 400 <= response.status_code < 500 and "syncstate" in response.text.lower()
 
 
 def _wait(attempt: int, retry_after: str | None, cause: object) -> None:

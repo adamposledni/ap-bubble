@@ -8,7 +8,14 @@ import requests
 
 from bubble_core.log import get_logger
 from bubble_ingest.l0_sync import CursorExpired
-from bubble_ingest.microsoft.graph import GRAPH_URL, Json, get_all_pages, get_json, iter_pages
+from bubble_ingest.microsoft.graph import (
+    GRAPH_URL,
+    Json,
+    get_all_pages,
+    get_json,
+    is_expired_delta,
+    iter_pages,
+)
 
 FOLDERS_URL = f"{GRAPH_URL}/me/mailFolders"
 PAGE_SIZE = 100
@@ -46,7 +53,6 @@ _DELTA_HEADERS = {
     )
 }
 _HTTP_NOT_FOUND = 404
-_HTTP_GONE = 410
 
 logger = get_logger(__name__)
 
@@ -95,7 +101,7 @@ def iter_message_pages(
         for page in iter_pages(session, url, params, _DELTA_HEADERS):
             yield MessagePage(page.get("value", []), page.get("@odata.deltaLink"))
     except requests.HTTPError as error:
-        if delta_link and _is_expired(error):
+        if delta_link and is_expired_delta(error):
             raise CursorExpired(folder_id) from error
         raise
 
@@ -105,13 +111,3 @@ def _first_load_params(received_filter: str | None) -> dict[str, Any]:
     if received_filter:
         params["$filter"] = received_filter
     return params
-
-
-def _is_expired(error: requests.HTTPError) -> bool:
-    """410 Gone, or a 4xx naming the sync state (Graph: 'error codes such as syncStateNotFound')."""
-    response = error.response
-    if response is None:
-        return False
-    if response.status_code == _HTTP_GONE:
-        return True
-    return 400 <= response.status_code < 500 and "syncstate" in response.text.lower()

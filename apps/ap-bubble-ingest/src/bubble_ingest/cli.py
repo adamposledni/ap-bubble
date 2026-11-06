@@ -13,6 +13,10 @@ from bubble_ingest.google.calendar import sync as google_calendar
 from bubble_ingest.google.contacts import sync as google_contacts
 from bubble_ingest.google.gmail import sync as gmail
 from bubble_ingest.google.tasks import sync as google_tasks
+from bubble_ingest.microsoft.calendar import sync as outlook_calendar
+from bubble_ingest.microsoft.mail import sync as outlook_mail
+from bubble_ingest.microsoft.planner import sync as planner
+from bubble_ingest.microsoft.todo import sync as microsoft_todo
 
 APP_NAME = "ap-bubble-ingest"
 CONNECTORS: dict[str, Callable] = {"google": connect_google, "microsoft": connect_microsoft}
@@ -21,6 +25,10 @@ SYNCS: dict[str, Callable[[sqlite3.Connection], None]] = {
     "google_tasks": google_tasks.sync_all,
     "google_contacts": google_contacts.sync_all,
     "gmail": gmail.sync_all,
+    "outlook_calendar": outlook_calendar.sync_all,
+    "outlook_mail": outlook_mail.sync_all,
+    "planner": planner.sync_all,
+    "microsoft_todo": microsoft_todo.sync_all,
 }
 
 logger = get_logger(__name__)
