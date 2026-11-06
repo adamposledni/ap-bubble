@@ -1,7 +1,8 @@
 """One curator run: gather inputs and L0 changes, write batches, let Claude curate them.
 
 L0 progress (the cursor) moves only when every batch of the run succeeded; inputs are
-'processing' while their batch runs, then 'done' or 'failed'. A dry run only writes the
+'processing' while their batch runs, then 'done' or 'failed' (retried by later runs up to
+MAX_INPUT_ATTEMPTS). A dry run only writes the
 batch files: no Claude call, no status or cursor change.
 """
 
@@ -10,7 +11,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-from bubble_core.input_queue import queued_inputs, requeue_stuck, set_status
+from bubble_core.input_queue import queued_inputs, requeue_failed, requeue_stuck, set_status
 from bubble_core.job_log import JobRun, job_run
 from bubble_core.log import get_logger
 from bubble_core.paths import curator_runs_dir
@@ -22,6 +23,7 @@ from bubble_curator.knowledge_index import write_index
 from bubble_curator.selection import is_curatable, window_start
 from bubble_curator.settings import (
     MAX_BATCH_CHARS,
+    MAX_INPUT_ATTEMPTS,
     MAX_INPUTS_PER_RUN,
     MAX_ITEMS_PER_RUN,
     WINDOW_DAYS,
@@ -46,6 +48,7 @@ def run(conn: sqlite3.Connection, options: Options) -> None:
     with job_run(conn, DRY_RUN_JOB_NAME if options.dry_run else JOB_NAME) as job:
         if not options.dry_run:
             requeue_stuck(conn)
+            requeue_failed(conn, MAX_INPUT_ATTEMPTS)
         inputs = queued_inputs(conn, MAX_INPUTS_PER_RUN)
         keep = partial(is_curatable, since=window_start(options.window_days))
         changes = read_changes(conn, load_position(conn), keep, options.max_items)

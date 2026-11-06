@@ -3,6 +3,7 @@
 WINDOW_DAYS = 30  # only L0 items of the last N days (open tasks and contacts always)
 MAX_ITEMS_PER_RUN = 300  # L0 items kept per run; the rest waits for the next run
 MAX_INPUTS_PER_RUN = 20  # queued L1 inputs per run
+MAX_INPUT_ATTEMPTS = 3  # a failed input is retried by the next runs until it failed this often
 MAX_BATCH_CHARS = 60_000  # text per batch file, i.e. per Claude call
 FILE_CHARS = 15_000  # batch weight of one attached file Claude has to read
 MAX_TEXT_CHARS = 1_500  # per message, note or description

@@ -20,11 +20,16 @@ def queued_inputs(conn: sqlite3.Connection, limit: int) -> list[Input]:
 def set_status(
     conn: sqlite3.Connection, input_ids: list[int], status: Status, error: str | None = None
 ) -> None:
-    """Move inputs to a new status; done and failed also record when. Commits."""
+    """Move inputs to a new status; done and failed also record when, failed counts an attempt.
+
+    Commits.
+    """
     processed_at = utc_now() if status in ("done", "failed") else None
+    failed = int(status == "failed")
     conn.executemany(
-        "UPDATE l1_inputs SET status = ?, error = ?, processed_at = ? WHERE id = ?",
-        [(status, error, processed_at, input_id) for input_id in input_ids],
+        "UPDATE l1_inputs SET status = ?, error = ?, processed_at = ?, attempts = attempts + ? "
+        "WHERE id = ?",
+        [(status, error, processed_at, failed, input_id) for input_id in input_ids],
     )
     conn.commit()
     logger.debug("Inputs %s are now %s", input_ids, status)
@@ -38,4 +43,16 @@ def requeue_stuck(conn: sqlite3.Connection) -> int:
     conn.commit()
     if cursor.rowcount:
         logger.warning("Requeued %d inputs left processing by an earlier run", cursor.rowcount)
+    return cursor.rowcount
+
+
+def requeue_failed(conn: sqlite3.Connection, max_attempts: int) -> int:
+    """Retry failed inputs that have attempts left; the error stays until they run. Commits."""
+    cursor = conn.execute(
+        "UPDATE l1_inputs SET status = 'queued' WHERE status = 'failed' AND attempts < ?",
+        (max_attempts,),
+    )
+    conn.commit()
+    if cursor.rowcount:
+        logger.warning("Retrying %d failed inputs", cursor.rowcount)
     return cursor.rowcount

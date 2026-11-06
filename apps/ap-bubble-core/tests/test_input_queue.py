@@ -1,6 +1,6 @@
 import sqlite3
 
-from bubble_core.input_queue import queued_inputs, requeue_stuck, set_status
+from bubble_core.input_queue import queued_inputs, requeue_failed, requeue_stuck, set_status
 from bubble_core.inputs import add_input, get_input
 
 
@@ -30,3 +30,14 @@ def test_stuck_inputs_go_back_to_the_queue(conn: sqlite3.Connection) -> None:
 
     assert requeue_stuck(conn) == 1
     assert get_input(conn, item.id).status == "queued"
+
+
+def test_failed_inputs_are_retried_until_attempts_run_out(conn: sqlite3.Connection) -> None:
+    item = add_input(conn, "note", [])
+
+    set_status(conn, [item.id], "failed", "boom")
+    assert requeue_failed(conn, max_attempts=2) == 1
+    set_status(conn, [item.id], "failed", "boom")
+
+    assert requeue_failed(conn, max_attempts=2) == 0
+    assert get_input(conn, item.id).status == "failed"
