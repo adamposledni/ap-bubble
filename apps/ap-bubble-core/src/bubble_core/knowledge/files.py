@@ -20,18 +20,23 @@ class KnowledgeNotFound(Exception):
 
 def list_files(folder: Folder | None = None) -> list[KnowledgeFile]:
     """Every knowledge file, or those of one folder (questions.md in the root is not one)."""
-    root = knowledge_dir()
-    folders = FOLDERS if folder is None else (folder,)
-    files = [_load(name, path) for name in folders for path in sorted((root / name).glob("*.md"))]
+    files = [load_file(name, path) for name, path in file_paths(folder)]
     logger.debug("Read %d knowledge files (folder %s)", len(files), folder or "all")
     return files
+
+
+def file_paths(folder: Folder | None = None) -> list[tuple[Folder, Path]]:
+    """(folder, path) of every knowledge file, or of those of one folder, without reading them."""
+    root = knowledge_dir()
+    folders = FOLDERS if folder is None else (folder,)
+    return [(name, path) for name in folders for path in sorted((root / name).glob("*.md"))]
 
 
 def read_file(folder: Folder, slug: str) -> KnowledgeFile:
     path = _path(folder, slug)
     if not path.is_file():
         raise KnowledgeNotFound(f"No knowledge file {folder}/{slug}")
-    return _load(folder, path)
+    return load_file(folder, path)
 
 
 def _path(folder: str, slug: str) -> Path:
@@ -41,7 +46,7 @@ def _path(folder: str, slug: str) -> Path:
     return knowledge_dir() / folder / f"{slug}.md"
 
 
-def _load(folder: Folder, path: Path) -> KnowledgeFile:
+def load_file(folder: Folder, path: Path) -> KnowledgeFile:
     logger.trace("Reading %s", path)
     raw, body = split_front_matter(path.read_text(encoding="utf-8", errors="replace"))
     return KnowledgeFile(folder=folder, slug=path.stem, meta=meta_from(raw, path.stem), body=body)

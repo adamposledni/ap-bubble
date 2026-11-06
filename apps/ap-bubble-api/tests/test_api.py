@@ -154,6 +154,12 @@ def test_knowledge_search_and_doc(client: TestClient) -> None:
     assert doc["backlinks"] == [{"folder": "people", "slug": "jana", "name": "Jana"}]
 
 
+def test_knowledge_search_takes_query_syntax_as_text(client: TestClient) -> None:
+    response = client.get("/api/knowledge", params={"q": 'NOT "petr (* ^'})
+
+    assert (response.status_code, response.json()) == (200, {"total": 0, "hits": []})
+
+
 def test_unknown_knowledge_doc_is_not_found(client: TestClient) -> None:
     assert client.get("/api/knowledge/people/missing").status_code == 404
     assert client.get("/api/knowledge/people/..%5Cvault").status_code == 404
