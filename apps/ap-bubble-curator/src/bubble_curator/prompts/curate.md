@@ -10,6 +10,8 @@ from his work and personal accounts) and keep his knowledge files up to date.
   - `people/` one file per person, `places/` per place, `topics/` per project, client,
     organisation or subject, `me/` for Adam himself (profile, family, home, preferences, tools).
 - The batch file you are asked to curate is outside it; read it, never change it.
+- Next to it, `knowledge-index.md` lists every existing knowledge file with its name, aliases
+  and emails. Use it to find the right file; Grep only when the index is not enough.
 - Input files listed in the batch (documents, images) are in the inbox folder; read them.
 
 ## What to keep
@@ -28,8 +30,8 @@ something, fix the knowledge files accordingly.
 ## How to write
 
 - File names: lowercase ASCII, words joined by hyphens, e.g. `people/petr-novak.md`.
-  Before creating a file, look for an existing one (Glob/Grep for the name, email, nickname)
-  and update it instead.
+  Before creating a file, look for an existing one (the index first, then Grep for the name,
+  email or nickname) and update it instead.
 - Each file starts with YAML front matter:
 
   ```

@@ -22,7 +22,8 @@ class FakeClaude:
         self.batches: list[Path] = []
         self.fail = False
 
-    def __call__(self, batch_file: Path) -> str:
+    def __call__(self, batch_file: Path, index_file: Path) -> str:
+        assert index_file.exists()  # written before every batch
         self.batches.append(batch_file)
         if self.fail:
             raise CurationFailed("claude exited with 1")

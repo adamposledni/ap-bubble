@@ -7,5 +7,9 @@ MAX_BATCH_CHARS = 60_000  # text per batch file, i.e. per Claude call
 MAX_TEXT_CHARS = 1_500  # per message, note or description
 CLAUDE_TIMEOUT_SECONDS = 30 * 60
 CLAUDE_COMMAND_ENV = "BUBBLE_CLAUDE_COMMAND"  # default: 'claude' on PATH
+CLAUDE_MODEL = "claude-opus-5-5"
+CLAUDE_MODEL_ENV = "BUBBLE_CURATOR_MODEL"
+CLAUDE_EFFORT = "medium"  # low / medium / high / xhigh / max
+CLAUDE_EFFORT_ENV = "BUBBLE_CURATOR_EFFORT"
 # An ingest run still 'running' after this long is taken as dead and no longer holds back curation.
 RUNNING_RUN_TIMEOUT_HOURS = 6

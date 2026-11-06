@@ -18,6 +18,7 @@ from bubble_curator.batches import Batch, pack, write_batches
 from bubble_curator.changes import ChangeSet, read_changes
 from bubble_curator.claude import CurationFailed, curate_batch
 from bubble_curator.cursor import load_position, save_position
+from bubble_curator.knowledge_index import write_index
 from bubble_curator.selection import is_curatable, window_start
 from bubble_curator.settings import (
     MAX_BATCH_CHARS,
@@ -56,6 +57,7 @@ def run(conn: sqlite3.Connection, options: Options) -> None:
         paths = write_batches(batches, curator_runs_dir() / str(job.id), job.id)
         job.items_processed = len(inputs) + len(changes.items)
         if options.dry_run:
+            write_index(_index_path(paths[0]))
             logger.info("Dry run: %d batches written, nothing curated", len(paths))
             return
         _curate(conn, batches, paths, job)
@@ -67,8 +69,9 @@ def _curate(conn: sqlite3.Connection, batches: list[Batch], paths: list[Path], j
     """Batch by batch; on a failure its inputs fail, later ones go back to the queue."""
     for index, (batch, path) in enumerate(zip(batches, paths, strict=True)):
         set_status(conn, batch.input_ids, "processing")
+        write_index(_index_path(path))  # again per batch: earlier batches may have added files
         try:
-            summary = curate_batch(path)
+            summary = curate_batch(path, _index_path(path))
         except CurationFailed as error:
             set_status(conn, batch.input_ids, "failed", str(error))
             later = [i for b in batches[index + 1 :] for i in b.input_ids]
@@ -77,6 +80,10 @@ def _curate(conn: sqlite3.Connection, batches: list[Batch], paths: list[Path], j
         set_status(conn, batch.input_ids, "done")
         logger.info("Batch %s done (%d items): %s", path.name, batch.item_count, summary[:200])
     logger.info("Run %d curated %d batches", job.id, len(batches))
+
+
+def _index_path(batch_file: Path) -> Path:
+    return batch_file.with_name("knowledge-index.md")
 
 
 def _finish_without_work(conn: sqlite3.Connection, changes: ChangeSet, options: Options) -> None:

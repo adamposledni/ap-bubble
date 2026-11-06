@@ -1,7 +1,8 @@
 """Runs Claude Code headless on one batch file, inside the knowledge folder.
 
 Claude may only read and edit files (no shell, no web); edits are accepted automatically.
-Its JSON result is saved next to the batch file.
+The session is lean: a fixed model and effort, no MCP servers, no user settings (plugins,
+hooks), no skills. Its JSON result is saved next to the batch file.
 """
 
 import json
@@ -13,12 +14,21 @@ from pathlib import Path
 
 from bubble_core.log import get_logger
 from bubble_core.paths import inbox_dir, knowledge_dir
-from bubble_curator.settings import CLAUDE_COMMAND_ENV, CLAUDE_TIMEOUT_SECONDS
+from bubble_curator.settings import (
+    CLAUDE_COMMAND_ENV,
+    CLAUDE_EFFORT,
+    CLAUDE_EFFORT_ENV,
+    CLAUDE_MODEL,
+    CLAUDE_MODEL_ENV,
+    CLAUDE_TIMEOUT_SECONDS,
+)
 
 TOOLS = "Read,Write,Edit,Glob,Grep"
+_NO_MCP_SERVERS = json.dumps({"mcpServers": {}})
 _PROMPT = (
-    "Curate the batch file {batch}: read it, then update the knowledge files in the current "
-    "folder following your instructions. Finish with a short summary of what you changed."
+    "Curate the batch file {batch}. The existing knowledge files are listed in {index}. "
+    "Update the knowledge files in the current folder following your instructions, then "
+    "finish with a short summary of what you changed."
 )
 _ERROR_TAIL = 500
 
@@ -29,9 +39,10 @@ class CurationFailed(Exception):
     """Claude could not curate a batch; the run stops and nothing is marked done."""
 
 
-def curate_batch(batch_file: Path) -> str:
+def curate_batch(batch_file: Path, index_file: Path) -> str:
     """Run Claude on the batch; return its summary. Raises CurationFailed."""
-    command = _command(batch_file)
+    command = [executable(), "-p", _PROMPT.format(batch=batch_file, index=index_file)]
+    command += _curation_flags(batch_file.parent) + session_flags()
     logger.info("Curating %s with Claude", batch_file.name)
     try:
         completed = subprocess.run(
@@ -48,31 +59,50 @@ def curate_batch(batch_file: Path) -> str:
     return _summary(completed)
 
 
+def session_flags() -> list[str]:
+    """Model, effort and a lean session; shared by curation and the smoke test."""
+    return [
+        "--model",
+        os.environ.get(CLAUDE_MODEL_ENV, CLAUDE_MODEL),
+        "--effort",
+        os.environ.get(CLAUDE_EFFORT_ENV, CLAUDE_EFFORT),
+        "--strict-mcp-config",
+        "--mcp-config",
+        _NO_MCP_SERVERS,
+        "--setting-sources",
+        "project,local",
+        "--disable-slash-commands",
+        "--exclude-dynamic-system-prompt-sections",
+        "--output-format",
+        "json",
+        "--no-session-persistence",
+    ]
+
+
+def executable() -> str:
+    found = shutil.which(os.environ.get(CLAUDE_COMMAND_ENV, "claude"))
+    if found is None:
+        raise CurationFailed("Claude Code CLI not found; install it or set " + CLAUDE_COMMAND_ENV)
+    return found
+
+
 def instructions() -> str:
     return (files("bubble_curator") / "prompts" / "curate.md").read_text(encoding="utf-8")
 
 
-def _command(batch_file: Path) -> list[str]:
-    executable = shutil.which(os.environ.get(CLAUDE_COMMAND_ENV, "claude"))
-    if executable is None:
-        raise CurationFailed("Claude Code CLI not found; install it or set " + CLAUDE_COMMAND_ENV)
+def _curation_flags(run_dir: Path) -> list[str]:
+    """File tools only, edits accepted; the run folder and the inbox are readable too."""
     return [
-        executable,
-        "-p",
-        _PROMPT.format(batch=batch_file),
         "--tools",
         TOOLS,
         "--permission-mode",
         "acceptEdits",
         "--add-dir",
-        str(batch_file.parent),
+        str(run_dir),
         "--add-dir",
         str(inbox_dir()),
         "--append-system-prompt",
         instructions(),
-        "--output-format",
-        "json",
-        "--no-session-persistence",
     ]
 
 
