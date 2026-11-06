@@ -116,14 +116,16 @@
       after 12 h); add executed actions once they exist.
 - [x] Monitor: show whether anything waits to be curated (queued L1 inputs, L0 changes past the
       curator cursor) or everything is done.
-- [ ] Monitor: total cost of a curator run in the run drawer (sum of the batches); stop a running
-      curator run.
+- [ ] Monitor: stop a running curator run.
 - [ ] Input: revoke an input, i.e. remove what the curator learned from it from the knowledge files
       (e.g. a curator instruction to drop facts citing `input:N`).
 - [ ] Input: the "All" view shows at most 100 inputs (`list_inputs`); add paging when it grows.
-- [ ] Questions: open-question count badge on the nav item.
 - [ ] Knowledge: graph view of links between knowledge files (backlinks are the navigation for now).
-- [ ] Knowledge: make `l0:N` / `input:N` citations clickable (open the source item or input).
+- [x] Knowledge: make `l0:N` / `input:N` citations clickable (open the source item or input).
 - [ ] Knowledge: entity page extras for people (birthday, recent mail, next meeting; REQUIREMENTS §8.1).
-- [ ] Knowledge: search scans the files on each request; move to an SQLite FTS index if it gets slow.
+- [x] Knowledge: search over an SQLite FTS index (`l2_knowledge_files`, `l2_knowledge_fts`), synced
+      by file mtime/size on each search; matching is word-prefix, no longer substring.
+- [ ] Knowledge: backlinks still read every file per doc view; store links in the index on sync.
+- [ ] Knowledge: `input:A–B` citation ranges are not clickable (only `l0:A–B`); L0 item view shows
+      no mail sender/recipients (only in raw data).
 - [ ] Web: the bundle is over 500 kB; code-split (e.g. lazy-load the Knowledge pages).
