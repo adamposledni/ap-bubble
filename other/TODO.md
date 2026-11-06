@@ -29,6 +29,8 @@
 - [ ] Check performance improvements to ingestion: multiple async/concurrent requests (per container,
       per account, per source). Mind per-user quotas: Gmail measured ~100 full messages/min, and a
       run right after a full load waits out the rate limit (incremental with 0 changes took 65 s).
+- [ ] OneNote ingest (postponed 2026-11-06; `Notes.Read` is already granted): sections as containers,
+      page metadata listed every run, page content (HTML) fetched only for new or changed pages.
 - [ ] Schedule ingest jobs (Windows Task Scheduler).
 
 ## Web UI
